@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MediTrack</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2C6E6A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MediTrack" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:          #F5F0E8;
+      --surface:     #FFFFFF;
+      --teal:        #2C6E6A;
+      --teal-lt:     #3D8C87;
+      --teal-pale:   #E0F0EF;
+      --coral:       #D95F3B;
+      --coral-lt:    #FDEEE9;
+      --text:        #1A2B2B;
+      --muted:       #7A9090;
+      --border:      #E2E8E8;
+      --morning:     #F59E0B;
+      --morning-bg:  #FFFBEB;
+      --afternoon:   #0EA5E9;
+      --afternoon-bg:#EFF9FF;
+      --evening:     #8B5CF6;
+      --evening-bg:  #F5F0FF;
+      --night:       #334155;
+      --night-bg:    #F1F4F8;
+      --radius:      16px;
+      --shadow:      0 2px 12px rgba(0,0,0,0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--teal);
+      color: white;
+      padding: 20px 20px 16px;
+      padding-top: calc(20px + env(safe-area-inset-top));
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-row { display: flex; align-items: center; justify-content: space-between; }
+    .app-name { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; }
+    .date-pill {
+      background: rgba(255,255,255,0.18);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 13px; font-weight: 600;
+    }
+    .week-label {
+      margin-top: 6px; font-size: 12px; opacity: 0.72;
+      font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    }
+
+    /* ── Tabs ── */
+    nav.tabs {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      position: sticky;
+      top: calc(72px + env(safe-area-inset-top));
+      z-index: 99;
+    }
+    nav.tabs button {
+      flex: 1; border: none; background: none;
+      padding: 12px 0 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12.5px; font-weight: 700;
+      color: var(--muted); cursor: pointer;
+      position: relative; transition: color 0.2s;
+      letter-spacing: 0.2px;
+    }
+    nav.tabs button.active { color: var(--teal); }
+    nav.tabs button.active::after {
+      content: ''; position: absolute;
+      bottom: 0; left: 15%; right: 15%;
+      height: 3px; background: var(--teal);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* ── Main ── */
+    main { flex: 1; overflow-y: auto; padding: 20px 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── Progress Card ── */
+    .progress-card {
+      background: var(--teal);
+      color: white;
+      border-radius: 20px;
+      padding: 22px 22px 18px;
+      margin-bottom: 20px;
+    }
+    .pc-day {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; font-weight: 800;
+      letter-spacing: 1px; text-transform: uppercase;
+      opacity: 0.72; margin-bottom: 10px;
+    }
+    .pc-dot { width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%; }
+    .pc-main { font-size: 46px; font-weight: 900; line-height: 1; letter-spacing: -1px; margin-bottom: 4px; }
+    .pc-sub  { font-size: 16px; font-weight: 600; opacity: 0.85; margin-bottom: 18px; }
+    .pc-bar-wrap { background: rgba(255,255,255,0.25); border-radius: 10px; height: 9px; overflow: hidden; margin-bottom: 10px; }
+    .pc-bar-fill { background: white; height: 100%; border-radius: 10px; transition: width 0.4s ease; }
+    .pc-completed { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.75; text-align: right; }
+
+    /* ── All Clear Banner ── */
+    .all-clear {
+      background: linear-gradient(135deg, var(--teal), var(--teal-lt));
+      color: white; border-radius: var(--radius);
+      margin-bottom: 20px; display: none; overflow: hidden;
+    }
+    .all-clear.show { display: block; }
+    .all-clear-top { padding: 22px; text-align: center; cursor: pointer; user-select: none; }
+    .ac-emoji { font-size: 34px; margin-bottom: 6px; }
+    .ac-title { font-size: 20px; font-weight: 800; }
+    .ac-sub   { font-size: 13.5px; opacity: 0.85; margin-top: 5px; }
+    .ac-hint  { font-size: 12px; opacity: 0.7; margin-top: 10px; }
+    .all-clear-body { display: none; background: rgba(0,0,0,0.15); padding: 12px; border-top: 1px solid rgba(255,255,255,0.2); }
+    .all-clear-body.open { display: block; }
+    .all-clear-body .med-card { background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); box-shadow: none; }
+    .all-clear-body .med-name { color: white; }
+    .all-clear-body .med-tag  { background: rgba(255,255,255,0.2); color: white; }
+    .all-clear-body .med-checkbox { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
+    .all-clear-body .med-checkbox.checked { background: white; border-color: white; }
+    .all-clear-body .med-checkbox.checked::after { color: var(--teal); }
+    .slot-title-ac { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.75); margin: 10px 4px 6px; }
+
+    /* ── Day Strip (Week View) ── */
+    .day-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; margin-bottom: 20px; }
+    .day-strip::-webkit-scrollbar { display: none; }
+    .day-btn { flex-shrink: 0; border: 2px solid var(--border); background: var(--surface); border-radius: 14px; padding: 8px 12px; cursor: pointer; text-align: center; transition: all 0.18s; min-width: 52px; }
+    .day-btn .day-name { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .day-btn .day-num  { font-size: 18px; font-weight: 800; color: var(--text); margin-top: 2px; }
+    .day-btn.active { background: var(--teal); border-color: var(--teal); }
+    .day-btn.active .day-name, .day-btn.active .day-num { color: white; }
+    .day-btn.today-dot { position: relative; }
+    .day-btn.today-dot::after { content: ''; width: 5px; height: 5px; background: var(--coral); border-radius: 50%; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); }
+    .day-btn.active.today-dot::after { background: rgba(255,255,255,0.8); }
+
+    /* ── Slot Sections ── */
+    .slot-section { margin-bottom: 22px; }
+    .slot-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .slot-icon { width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .slot-title { font-size: 18px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; }
+    .slot-count { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--muted); }
+    .slot-morning   .slot-icon { background: var(--morning-bg); }
+    .slot-afternoon .slot-icon { background: var(--afternoon-bg); }
+    .slot-evening   .slot-icon { background: var(--evening-bg); }
+    .slot-night     .slot-icon { background: var(--night-bg); }
+    .slot-morning   .slot-title { color: var(--morning); }
+    .slot-afternoon .slot-title { color: var(--afternoon); }
+    .slot-evening   .slot-title { color: var(--evening); }
+    .slot-night     .slot-title { color: var(--night); }
+
+    /* ── Medicine Card ── */
+    .med-card { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; box-shadow: var(--shadow); transition: all 0.25s ease; }
+    .med-card.checked { opacity: 0.55; }
+    .med-card.checked .med-name { text-decoration: line-through; text-decoration-thickness: 2px; }
+    .med-checkbox { width: 26px; height: 26px; border-radius: 8px; border: 2.5px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: white; }
+    .med-checkbox.checked { background: var(--teal); border-color: var(--teal); }
+    .med-checkbox.checked::after { content: '✓'; color: white; font-size: 15px; font-weight: 900; }
+    .med-info { flex: 1; }
+    .med-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .med-tags { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+    .med-tag { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+    .tag-before { background: #FEF3C7; color: #92400E; }
+    .tag-after  { background: #D1FAE5; color: #065F46; }
+
+    /* ── No medicines ── */
+    .no-medicines { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .no-medicines .big-icon { font-size: 48px; margin-bottom: 12px; }
+    .no-medicines p { font-size: 15px; font-weight: 600; line-height: 1.6; }
+
+    /* ══════════════════════════════
+       ADD TAB
+    ══════════════════════════════ */
+    .add-view-header { margin-bottom: 22px; }
+    .add-view-header h2 { font-size: 24px; font-weight: 900; color: var(--text); }
+    .add-view-header p  { font-size: 14px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+
+    .form-section { margin-bottom: 22px; }
+    .form-section-label {
+      font-size: 12px; font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px;
+      display: block;
+    }
+
+    /* Name input */
+    .name-input-wrap { position: relative; }
+    .name-input-wrap input {
+      width: 100%; border: 2px solid var(--border); border-radius: 14px;
+      padding: 15px 50px 15px 18px;
+      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 600;
+      color: var(--text); background: var(--surface); outline: none; transition: border 0.2s;
+    }
+    .name-input-wrap input:focus { border-color: var(--teal); }
+    .name-input-wrap input::placeholder { color: var(--muted); }
+    .name-input-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 20px; }
+
+    /* Time pill buttons */
+    .time-pill-group { display: flex; flex-wrap: wrap; gap: 10px; }
+    .time-pill {
+      flex: 1; min-width: calc(50% - 5px);
+      border: 2.5px solid var(--border); background: var(--surface);
+      border-radius: 50px; padding: 13px 10px;
+      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 700;
+      color: var(--muted); cursor: pointer; transition: all 0.18s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .time-pill.selected { color: white; border-color: transparent; }
+    .time-pill[data-time="morning"].selected   { background: var(--morning); }
+    .time-pill[data-time="afternoon"].selected { background: var(--afternoon); }
+    .time-pill[data-time="evening"].selected   { background: var(--evening); }
+    .time-pill[data-time="night"].selected     { background: var(--night); }
+
+    /* Day picker */
+    .day-picker-row { display: flex; gap: 6px; justify-content: space-between; margin-bottom: 10px; }
+    .day-circle {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 2.5px solid var(--border); background: var(--surface);
+      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+      color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s; flex-shrink: 0;
+    }
+    .day-circle.selected { background: var(--teal); border-color: var(--teal); color: white; }
+    .all-days-btn {
+      width: 100%; border: 2.5px solid var(--border); background: var(--surface);
+      border-radius: 50px; padding: 11px;
+      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
+      color: var(--muted); cursor: pointer; transition: all 0.18s;
+    }
+    .all-days-btn.selected { background: var(--teal-pale); border-color: var(--teal); color: var(--teal); }
+
+    /* Food options */
+    .food-option {
+      border: 2.5px solid var(--border); background: var(--surface);
+      border-radius: 16px; padding: 16px 18px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 10px; cursor: pointer; transition: all 0.18s;
+    }
+    .food-option:last-child { margin-bottom: 0; }
+    .food-option.selected { border-color: var(--teal); background: var(--teal-pale); }
+    .food-icon { font-size: 22px; width: 32px; text-align: center; }
+    .food-label { font-size: 18px; font-weight: 700; flex: 1; color: var(--text); }
+    .food-radio { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.18s; flex-shrink: 0; }
+    .food-option.selected .food-radio { border-color: var(--teal); }
+    .food-option.selected .food-radio::after { content: ''; width: 12px; height: 12px; background: var(--teal); border-radius: 50%; display: block; }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%; background: var(--teal); color: white; border: none;
+      border-radius: 16px; padding: 16px;
+      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
+      cursor: pointer; transition: background 0.2s; letter-spacing: 0.3px;
+      margin-top: 4px;
+    }
+    .btn-submit:hover { background: var(--teal-lt); }
+    .btn-submit:active { transform: scale(0.98); }
+
+    /* ══════════════════════════════
+       MEDS TAB
+    ══════════════════════════════ */
+    .meds-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+    .meds-header h2 { font-size: 22px; font-weight: 900; }
+    .meds-count { font-size: 14px; font-weight: 700; color: var(--teal); }
+
+    .med-plan-card { background: var(--surface); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+    .med-plan-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
+    .med-plan-name-row { display: flex; align-items: center; gap: 8px; }
+    .med-dot { width: 10px; height: 10px; background: var(--teal); border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+    .med-plan-name { font-size: 19px; font-weight: 800; color: var(--text); }
+    .food-badge { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; white-space: nowrap; }
+    .badge-before { background: #FEF3C7; color: #92400E; }
+    .badge-after  { background: #D1FAE5; color: #065F46; }
+
+    .med-plan-meta { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .meta-row { display: flex; gap: 20px; }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-label { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+    .meta-value { font-size: 14px; font-weight: 700; color: var(--text); }
+    .time-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .time-chip { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+    .chip-morning   { background: var(--morning-bg);   color: var(--morning); }
+    .chip-afternoon { background: var(--afternoon-bg); color: var(--afternoon); }
+    .chip-evening   { background: var(--evening-bg);   color: var(--evening); }
+    .chip-night     { background: var(--night-bg);     color: var(--night); }
+
+    .med-plan-actions { display: flex; gap: 10px; }
+    .btn-edit {
+      flex: 1; background: var(--bg); border: none; border-radius: 12px; padding: 12px;
+      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; color: var(--text);
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-edit:hover { background: var(--border); }
+    .btn-delete {
+      width: 46px; height: 46px; background: var(--coral-lt); border: none; border-radius: 12px;
+      color: var(--coral); font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .btn-delete:hover { background: #fad5c8; }
+
+    .add-new-card {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 28px 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; margin-top: 4px;
+    }
+    .add-new-card:hover { border-color: var(--teal); background: var(--teal-pale); }
+    .add-new-card .anc-icon { font-size: 32px; margin-bottom: 8px; }
+    .add-new-card h3 { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .add-new-card p  { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+    /* ── Week reset info ── */
+    .week-reset-info { background: var(--teal-pale); border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--teal); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: white; border-radius: 24px; padding: 10px 22px; font-size: 14px; font-weight: 700; white-space: nowrap; opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="app-name">💊 MediTrack</div>
+    <div class="date-pill" id="headerDate"></div>
+  </div>
+  <div class="week-label" id="weekLabel"></div>
+</header>
+
+<nav class="tabs">
+  <button class="active" onclick="switchTab('today')">Today</button>
+  <button onclick="switchTab('week')">Week</button>
+  <button onclick="switchTab('add')">Add</button>
+  <button onclick="switchTab('meds')">Meds</button>
+</nav>
+
+<main>
+
+  <!-- ── TODAY VIEW ── -->
+  <div class="view active" id="view-today">
+
+    <div class="all-clear" id="allClear">
+      <div class="all-clear-top" onclick="toggleAllClearExpand()">
+        <div class="ac-emoji">🎉</div>
+        <div class="ac-title">All done for today!</div>
+        <div class="ac-sub">Every medicine has been taken. Great job!</div>
+        <div class="ac-hint">▼ Tap to review or correct</div>
+      </div>
+      <div class="all-clear-body" id="allClearBody"></div>
+    </div>
+
+    <div class="progress-card" id="progressCard" style="display:none">
+      <div class="pc-day">
+        <span id="pcDay"></span>
+        <span class="pc-dot"></span>
+      </div>
+      <div class="pc-main" id="pcMain">—</div>
+      <div class="pc-sub"  id="pcSub"></div>
+      <div class="pc-bar-wrap"><div class="pc-bar-fill" id="pcBarFill" style="width:0%"></div></div>
+      <div class="pc-completed" id="pcCompleted"></div>
+    </div>
+
+    <div id="todaySlots"></div>
+  </div>
+
+  <!-- ── WEEK VIEW ── -->
+  <div class="view" id="view-week">
+    <div class="day-strip" id="dayStrip"></div>
+    <div id="weekSlots"></div>
+  </div>
+
+  <!-- ── ADD VIEW ── -->
+  <div class="view" id="view-add">
+    <div class="add-view-header">
+      <h2 id="addFormTitle">Add Medicine</h2>
+      <p id="addFormSub">Set up a daily medication entry.</p>
+    </div>
+
+    <div class="form-section">
+      <span class="form-section-label">Medicine Name</span>
+      <div class="name-input-wrap">
+        <input type="text" id="medNameInput" placeholder="e.g. Metformin 1000mg" />
+        <span class="name-input-icon">💊</span>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <span class="form-section-label">Time of Day</span>
+      <div class="time-pill-group">
+        <button class="time-pill" data-time="morning"   onclick="toggleTime(this)">🌅 সকাল</button>
+        <button class="time-pill" data-time="afternoon" onclick="toggleTime(this)">☀️ দুপুর</button>
+        <button class="time-pill" data-time="evening"   onclick="toggleTime(this)">🌆 বিকাল</button>
+        <button class="time-pill" data-time="night"     onclick="toggleTime(this)">🌙 রাত</button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <span class="form-section-label">Frequency</span>
+      <div class="day-picker-row">
+        <button class="day-circle selected" data-day="mon" onclick="toggleDay(this)">M</button>
+        <button class="day-circle selected" data-day="tue" onclick="toggleDay(this)">T</button>
+        <button class="day-circle selected" data-day="wed" onclick="toggleDay(this)">W</button>
+        <button class="day-circle selected" data-day="thu" onclick="toggleDay(this)">T</button>
+        <button class="day-circle selected" data-day="fri" onclick="toggleDay(this)">F</button>
+        <button class="day-circle selected" data-day="sat" onclick="toggleDay(this)">S</button>
+        <button class="day-circle selected" data-day="sun" onclick="toggleDay(this)">S</button>
+      </div>
+      <button class="all-days-btn selected" id="allDaysBtn" onclick="selectAllDays()">✓ All Days of the Week</button>
+    </div>
+
+    <div class="form-section">
+      <span class="form-section-label">Food Timing</span>
+      <div onclick="selectFood('before')" class="food-option" id="food-before">
+        <span class="food-icon">🍽️</span>
+        <span class="food-label">খাবার আগে</span>
+        <div class="food-radio"></div>
+      </div>
+      <div onclick="selectFood('after')" class="food-option" id="food-after">
+        <span class="food-icon">🥄</span>
+        <span class="food-label">খাবার পরে</span>
+        <div class="food-radio"></div>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="addSubmitBtn" onclick="addOrUpdateMedicine()">Add Medicine</button>
+  </div>
+
+  <!-- ── MEDS VIEW ── -->
+  <div class="view" id="view-meds">
+    <div class="week-reset-info">🔄 Medicines repeat every week automatically.</div>
+    <div class="meds-header">
+      <h2>Your Medicines</h2>
+      <span class="meds-count" id="medsCount"></span>
+    </div>
+    <div id="medicineList"></div>
+    <div class="add-new-card" onclick="switchTab('add')">
+      <div class="anc-icon">➕</div>
+      <h3>Add New Medicine</h3>
+      <p>Tap to set up a new medication.</p>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Constants ──────────────────────────────────────────
+const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAYS_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const SLOTS = [
+  { id: 'morning',   label: 'সকাল',  icon: '🌅', cls: 'slot-morning' },
+  { id: 'afternoon', label: 'দুপুর', icon: '☀️',  cls: 'slot-afternoon' },
+  { id: 'evening',   label: 'বিকাল', icon: '🌆', cls: 'slot-evening' },
+  { id: 'night',     label: 'রাত',   icon: '🌙', cls: 'slot-night' },
+];
+
+// Day order: Mon → Sun (matches picker display)
+const DAY_ORDER = ['mon','tue','wed','thu','fri','sat','sun'];
+// JS getDay() → day key
+const JS_TO_DAY = ['sun','mon','tue','wed','thu','fri','sat'];
+const DAY_ABBR  = { mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', sun:'Sun' };
+
+// ── Helpers ────────────────────────────────────────────
+function uuid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function getMondayOf(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day === 0) ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function todayKey() { return dateKey(new Date()); }
+
+function getDayKeyFromStr(dayStr) {
+  // Parse YYYY-MM-DD safely without timezone shifts
+  const [y,m,d] = dayStr.split('-').map(Number);
+  const date = new Date(y, m-1, d);
+  return JS_TO_DAY[date.getDay()];
+}
+
+function isMedScheduledForDay(med, dayKey) {
+  // Backwards compat: old medicines without days show every day
+  if (!med.days || med.days.length === 0) return true;
+  return med.days.includes(dayKey);
+}
+
+function formatDays(days) {
+  if (!days || days.length === 7) return 'Daily';
+  return DAY_ORDER.filter(d => days.includes(d)).map(d => DAY_ABBR[d]).join(', ');
+}
+
+function getNextSlotLabel(todayStr, checkKeys, dayKey) {
+  for (const slot of SLOTS) {
+    const meds = state.medicines.filter(m =>
+      m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
+    );
+    if (meds.some(m => !checkKeys[m.id + '_' + slot.id])) {
+      return slot.icon + ' ' + slot.label;
+    }
+  }
+  return '';
+}
+
+// ── State ──────────────────────────────────────────────
+let state = {
+  medicines: [],   // [{id, name, doses:[{time,food}], days:['mon',...]}]
+  weekStart: null, // 'YYYY-MM-DD' of Monday
+  checks:    {}    // { 'YYYY-MM-DD': { 'medId_slotId': true } }
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('meditrack_state');
+    if (s) state = JSON.parse(s);
+    // Migrate old medicines without days → all days
+    state.medicines = state.medicines.map(m => ({
+      ...m,
+      days: m.days || [...DAY_ORDER]
+    }));
+  } catch(e) {}
+  checkWeekReset();
+}
+
+function saveState() {
+  localStorage.setItem('meditrack_state', JSON.stringify(state));
+}
+
+// ── Weekly Reset ───────────────────────────────────────
+// ONLY clears the tick history. Medicines (including frequency) are NEVER touched.
+function checkWeekReset() {
+  const monday = getMondayOf(new Date());
+  const currentWeekStart = dateKey(monday);
+  if (state.weekStart !== currentWeekStart) {
+    state.weekStart = currentWeekStart;
+    state.checks = {};    // ← only checks cleared, medicines untouched
+    saveState();
+  }
+}
+
+// ── Tab Switching ──────────────────────────────────────
+let activeTab = 'today';
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  document.querySelectorAll('nav.tabs button').forEach((b,i) => {
+    b.classList.toggle('active', ['today','week','add','meds'][i] === tab);
+  });
+  renderAll();
+}
+
+// ── Rendering ──────────────────────────────────────────
+function renderAll() {
+  updateHeader();
+  if (activeTab === 'today') renderToday();
+  if (activeTab === 'week')  renderWeek();
+  if (activeTab === 'add')   { /* form is static HTML, nothing to re-render */ }
+  if (activeTab === 'meds')  renderMeds();
+}
+
+function updateHeader() {
+  const now = new Date();
+  document.getElementById('headerDate').textContent =
+    DAYS_S[now.getDay()] + ', ' + MONTHS[now.getMonth()] + ' ' + now.getDate();
+  const monday = getMondayOf(now);
+  const sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
+  document.getElementById('weekLabel').textContent =
+    'Week of ' + MONTHS[monday.getMonth()] + ' ' + monday.getDate() +
+    ' – ' + MONTHS[sunday.getMonth()] + ' ' + sunday.getDate();
+}
+
+// ── Build Slots HTML ───────────────────────────────────
+// Filters by day of week using medicine.days[]
+function buildSlotsHTML(dayStr, interactive) {
+  const dayKey = getDayKeyFromStr(dayStr);
+  let html = '';
+  let totalDoses = 0, doneDoses = 0;
+
+  for (const slot of SLOTS) {
+    // Only include medicines scheduled for this day
+    const meds = state.medicines.filter(m =>
+      m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
+    );
+    if (meds.length === 0) continue;
+
+    const checkKeys = state.checks[dayStr] || {};
+    let checkedCount = 0;
+    meds.forEach(m => {
+      if (checkKeys[m.id + '_' + slot.id]) { checkedCount++; doneDoses++; }
+      totalDoses++;
+    });
+
+    html += `<div class="slot-section" data-slot="${slot.id}">
+      <div class="slot-header ${slot.cls}">
+        <div class="slot-icon">${slot.icon}</div>
+        <div class="slot-title">${slot.label}</div>
+        <div class="slot-count">${checkedCount}/${meds.length}</div>
+      </div>`;
+
+    for (const med of meds) {
+      const key     = med.id + '_' + slot.id;
+      const checked = !!(checkKeys[key]);
+      const dose    = med.doses.find(d => d.time === slot.id);
+      const foodTag = dose
+        ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
+        : '';
+
+      if (interactive) {
+        html += `<div class="med-card ${checked ? 'checked' : ''}" id="card-${dayStr}-${key}">
+          <div class="med-checkbox ${checked ? 'checked' : ''}" onclick="toggleCheck('${dayStr}','${key}')"></div>
+          <div class="med-info">
+            <div class="med-name">${med.name}</div>
+            <div class="med-tags">${foodTag}</div>
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="med-card ${checked ? 'checked' : ''}">
+          <div class="med-info">
+            <div class="med-name">${med.name}</div>
+            <div class="med-tags">${foodTag}</div>
+          </div>
+        </div>`;
+      }
+    }
+    html += `</div>`;
+  }
+
+  if (!html) {
+    html = `<div class="no-medicines">
+      <div class="big-icon">💊</div>
+      <p>No medicines scheduled for today.<br>Go to <strong>Add</strong> tab to add some.</p>
+    </div>`;
+  }
+
+  return { html, totalDoses, doneDoses };
+}
+
+// ── Render Today ───────────────────────────────────────
+function renderToday() {
+  const today  = todayKey();
+  const dayKey = getDayKeyFromStr(today);
+  const { html, totalDoses, doneDoses } = buildSlotsHTML(today, true);
+
+  document.getElementById('todaySlots').innerHTML = html;
+
+  const card     = document.getElementById('progressCard');
+  const allClear = document.getElementById('allClear');
+
+  if (totalDoses === 0) {
+    card.style.display = 'none';
+    allClear.classList.remove('show');
+    return;
+  }
+
+  // Update big progress card
+  const left   = totalDoses - doneDoses;
+  const pct    = Math.round((doneDoses / totalDoses) * 100);
+  const now    = new Date();
+  const checkKeys = state.checks[today] || {};
+
+  document.getElementById('pcDay').textContent =
+    DAYS[now.getDay()].toUpperCase() + ', ' + now.getDate() + ' · TODAY';
+  document.getElementById('pcMain').textContent =
+    left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
+  document.getElementById('pcSub').textContent =
+    left > 0 ? 'Next: ' + (getNextSlotLabel(today, checkKeys, dayKey) || '') : '';
+  document.getElementById('pcBarFill').style.width = pct + '%';
+  document.getElementById('pcCompleted').textContent =
+    doneDoses + ' OF ' + totalDoses + ' COMPLETED';
+
+  if (doneDoses === totalDoses && totalDoses > 0) {
+    allClear.classList.add('show');
+    card.style.display = 'none';
+    document.getElementById('todaySlots').style.display = 'none';
+    buildAllClearBody();
+  } else {
+    allClear.classList.remove('show');
+    card.style.display = 'block';
+    document.getElementById('todaySlots').style.display = 'block';
+  }
+}
+
+// ── Toggle Check ───────────────────────────────────────
+// Single source of truth: always re-render from state. No partial DOM updates.
+function toggleCheck(dayStr, key) {
+  if (!state.checks[dayStr]) state.checks[dayStr] = {};
+  state.checks[dayStr][key] = !state.checks[dayStr][key];
+  saveState();
+  renderToday();
+}
+
+// ── Update Slot Counter (kept for reference, unused in toggleCheck) ────
+function updateSlotCounter(dayStr, slotId) {
+  const dayKey    = getDayKeyFromStr(dayStr);
+  const checkKeys = state.checks[dayStr] || {};
+  const meds      = state.medicines.filter(m =>
+    m.doses.some(d => d.time === slotId) && isMedScheduledForDay(m, dayKey)
+  );
+  const done = meds.filter(m => checkKeys[m.id + '_' + slotId]).length;
+  // Uses data-slot attribute — language-independent, never breaks
+  const sec = document.querySelector(`#todaySlots .slot-section[data-slot="${slotId}"]`);
+  if (sec) {
+    const counter = sec.querySelector('.slot-count');
+    if (counter) counter.textContent = done + '/' + meds.length;
+  }
+}
+
+// ── Update Progress Card ───────────────────────────────
+function updateProgressCard(dayStr) {
+  const dayKey    = getDayKeyFromStr(dayStr);
+  const checkKeys = state.checks[dayStr] || {};
+  let totalDoses = 0, doneDoses = 0;
+
+  for (const slot of SLOTS) {
+    const meds = state.medicines.filter(m =>
+      m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
+    );
+    meds.forEach(m => {
+      totalDoses++;
+      if (checkKeys[m.id + '_' + slot.id]) doneDoses++;
+    });
+  }
+  if (totalDoses === 0) return;
+
+  const left = totalDoses - doneDoses;
+  const pct  = Math.round((doneDoses / totalDoses) * 100);
+
+  document.getElementById('pcMain').textContent =
+    left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
+  document.getElementById('pcSub').textContent =
+    left > 0 ? 'Next: ' + (getNextSlotLabel(dayStr, checkKeys, dayKey) || '') : '';
+  document.getElementById('pcBarFill').style.width = pct + '%';
+  document.getElementById('pcCompleted').textContent =
+    doneDoses + ' OF ' + totalDoses + ' COMPLETED';
+
+  if (doneDoses === totalDoses) {
+    document.getElementById('allClear').classList.add('show');
+    document.getElementById('progressCard').style.display = 'none';
+    document.getElementById('todaySlots').style.display = 'none';
+    buildAllClearBody();
+  } else {
+    document.getElementById('allClear').classList.remove('show');
+    document.getElementById('progressCard').style.display = 'block';
+    document.getElementById('todaySlots').style.display = 'block';
+  }
+}
+
+// ── All Clear Collapsible ──────────────────────────────
+function toggleAllClearExpand() {
+  const body = document.getElementById('allClearBody');
+  const hint = document.querySelector('.ac-hint');
+  const isOpen = body.classList.toggle('open');
+  hint.textContent = isOpen ? '▲ Tap to collapse' : '▼ Tap to review or correct';
+}
+
+function buildAllClearBody() {
+  const today    = todayKey();
+  const dayKey   = getDayKeyFromStr(today);
+  const checkKeys = state.checks[today] || {};
+  let html = '';
+
+  for (const slot of SLOTS) {
+    const meds = state.medicines.filter(m =>
+      m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
+    );
+    if (meds.length === 0) continue;
+    html += `<div class="slot-title-ac">${slot.icon} ${slot.label}</div>`;
+    for (const med of meds) {
+      const key  = med.id + '_' + slot.id;
+      const dose = med.doses.find(d => d.time === slot.id);
+      const foodTag = dose
+        ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
+        : '';
+      html += `<div class="med-card checked" id="card-${today}-${key}">
+        <div class="med-checkbox checked" onclick="toggleCheck('${today}','${key}')"></div>
+        <div class="med-info">
+          <div class="med-name">${med.name}</div>
+          <div class="med-tags">${foodTag}</div>
+        </div>
+      </div>`;
+    }
+  }
+  document.getElementById('allClearBody').innerHTML = html;
+}
+
+// ── Week View ──────────────────────────────────────────
+let selectedWeekDay = null;
+
+function renderWeek() {
+  const today    = new Date();
+  const monday   = getMondayOf(today);
+  const todayStr = dateKey(today);
+  let stripHtml  = '';
+
+  for (let i = 0; i < 7; i++) {
+    const d    = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dStr    = dateKey(d);
+    const isToday = dStr === todayStr;
+    const isActive = selectedWeekDay ? selectedWeekDay === dStr : isToday;
+    stripHtml += `<div class="day-btn ${isActive ? 'active' : ''} ${isToday ? 'today-dot' : ''}"
+      onclick="selectWeekDay('${dStr}')">
+      <div class="day-name">${DAYS_S[d.getDay()]}</div>
+      <div class="day-num">${d.getDate()}</div>
+    </div>`;
+  }
+  document.getElementById('dayStrip').innerHTML = stripHtml;
+
+  const selectedDay = selectedWeekDay || todayStr;
+  const { html } = buildSlotsHTML(selectedDay, false); // always read-only in week tab
+  document.getElementById('weekSlots').innerHTML = html;
+}
+
+function selectWeekDay(dStr) {
+  selectedWeekDay = dStr;
+  renderWeek();
+}
+
+// ── Meds View ──────────────────────────────────────────
+function renderMeds() {
+  const list = document.getElementById('medicineList');
+  document.getElementById('medsCount').textContent =
+    state.medicines.length + ' Total';
+
+  if (state.medicines.length === 0) {
+    list.innerHTML = `<div class="no-medicines">
+      <div class="big-icon">🌿</div>
+      <p>No medicines yet.<br>Tap <strong>Add</strong> to get started.</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = state.medicines.map(med => {
+    const food     = med.doses[0]?.food || 'before';
+    const badgeCls = food === 'before' ? 'badge-before' : 'badge-after';
+    const badgeTxt = food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে';
+
+    const timeChips = med.doses.map(d =>
+      `<span class="time-chip chip-${d.time}">${SLOTS.find(s=>s.id===d.time)?.icon} ${SLOTS.find(s=>s.id===d.time)?.label}</span>`
+    ).join('');
+
+    const daysText = formatDays(med.days);
+
+    return `<div class="med-plan-card">
+      <div class="med-plan-top">
+        <div>
+          <div class="med-plan-name-row">
+            <span class="med-dot"></span>
+            <span class="med-plan-name">${med.name}</span>
+          </div>
+        </div>
+        <span class="food-badge ${badgeCls}">${badgeTxt}</span>
+      </div>
+      <div class="med-plan-meta">
+        <div class="meta-row">
+          <div class="meta-item">
+            <span class="meta-label">Time</span>
+            <div class="time-chips">${timeChips}</div>
+          </div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-item">
+            <span class="meta-label">Frequency</span>
+            <span class="meta-value">${daysText}</span>
+          </div>
+        </div>
+      </div>
+      <div class="med-plan-actions">
+        <button class="btn-edit" onclick="editMedicine('${med.id}')">✏️ Edit</button>
+        <button class="btn-delete" onclick="removeMedicine('${med.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Add / Edit Form Logic ──────────────────────────────
+let selectedTimes = new Set();
+let selectedFood  = null;
+let selectedDays  = new Set(DAY_ORDER); // default all days
+let editingMedId  = null;
+
+function toggleTime(btn) {
+  const t = btn.dataset.time;
+  selectedTimes.has(t) ? selectedTimes.delete(t) : selectedTimes.add(t);
+  btn.classList.toggle('selected', selectedTimes.has(t));
+}
+
+function toggleDay(btn) {
+  const d = btn.dataset.day;
+  selectedDays.has(d) ? selectedDays.delete(d) : selectedDays.add(d);
+  btn.classList.toggle('selected', selectedDays.has(d));
+  updateAllDaysBtn();
+}
+
+function selectAllDays() {
+  DAY_ORDER.forEach(d => selectedDays.add(d));
+  document.querySelectorAll('[data-day]').forEach(b => b.classList.add('selected'));
+  document.getElementById('allDaysBtn').classList.add('selected');
+}
+
+function updateAllDaysBtn() {
+  const allSelected = DAY_ORDER.every(d => selectedDays.has(d));
+  document.getElementById('allDaysBtn').classList.toggle('selected', allSelected);
+}
+
+function selectFood(value) {
+  selectedFood = value;
+  document.getElementById('food-before').classList.toggle('selected', value === 'before');
+  document.getElementById('food-after').classList.toggle('selected', value === 'after');
+}
+
+function addOrUpdateMedicine() {
+  const name = document.getElementById('medNameInput').value.trim();
+  if (!name)                 { showToast('Please enter a medicine name'); return; }
+  if (selectedTimes.size === 0) { showToast('Please select at least one time slot'); return; }
+  if (selectedDays.size === 0)  { showToast('Please select at least one day'); return; }
+  if (!selectedFood)            { showToast('Please select food timing'); return; }
+
+  const doses = [...selectedTimes].map(t => ({ time: t, food: selectedFood }));
+  const days  = DAY_ORDER.filter(d => selectedDays.has(d));
+
+  if (editingMedId) {
+    const idx = state.medicines.findIndex(m => m.id === editingMedId);
+    if (idx !== -1) {
+      state.medicines[idx] = { id: editingMedId, name, doses, days };
+    }
+    showToast('✅ Medicine updated!');
+  } else {
+    if (state.medicines.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+      showToast('Medicine already exists'); return;
+    }
+    state.medicines.push({ id: uuid(), name, doses, days });
+    showToast('✅ ' + name + ' added!');
+  }
+
+  saveState();
+  resetAddForm();
+  switchTab('meds');
+}
+
+function editMedicine(id) {
+  const med = state.medicines.find(m => m.id === id);
+  if (!med) return;
+  editingMedId = id;
+
+  document.getElementById('medNameInput').value = med.name;
+
+  selectedTimes = new Set(med.doses.map(d => d.time));
+  document.querySelectorAll('[data-time]').forEach(b =>
+    b.classList.toggle('selected', selectedTimes.has(b.dataset.time))
+  );
+
+  selectedFood = med.doses[0]?.food || null;
+  document.getElementById('food-before').classList.toggle('selected', selectedFood === 'before');
+  document.getElementById('food-after').classList.toggle('selected', selectedFood === 'after');
+
+  const days = med.days || [...DAY_ORDER];
+  selectedDays = new Set(days);
+  document.querySelectorAll('[data-day]').forEach(b =>
+    b.classList.toggle('selected', selectedDays.has(b.dataset.day))
+  );
+  updateAllDaysBtn();
+
+  document.getElementById('addSubmitBtn').textContent = 'Update Medicine';
+  document.getElementById('addFormTitle').textContent = 'Edit Medicine';
+  document.getElementById('addFormSub').textContent   = 'Update the medication details.';
+  switchTab('add');
+}
+
+function removeMedicine(id) {
+  const med = state.medicines.find(m => m.id === id);
+  if (!med) return;
+  state.medicines = state.medicines.filter(m => m.id !== id);
+  Object.keys(state.checks).forEach(day => {
+    Object.keys(state.checks[day] || {}).forEach(k => {
+      if (k.startsWith(id + '_')) delete state.checks[day][k];
+    });
+  });
+  saveState();
+  renderMeds();
+  showToast('🗑 ' + med.name + ' removed');
+}
+
+function resetAddForm() {
+  document.getElementById('medNameInput').value = '';
+  selectedTimes.clear();
+  selectedFood  = null;
+  selectedDays  = new Set(DAY_ORDER);
+  editingMedId  = null;
+
+  document.querySelectorAll('[data-time]').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('[data-day]').forEach(b  => b.classList.add('selected'));
+  document.getElementById('allDaysBtn').classList.add('selected');
+  document.getElementById('food-before').classList.remove('selected');
+  document.getElementById('food-after').classList.remove('selected');
+  document.getElementById('addSubmitBtn').textContent  = 'Add Medicine';
+  document.getElementById('addFormTitle').textContent  = 'Add Medicine';
+  document.getElementById('addFormSub').textContent    = 'Set up a daily medication entry.';
+}
+
+// ── Toast ──────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Service Worker ─────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ── Init ──────────────────────────────────────────────
+loadState();
+renderAll();
+
+// Re-check week reset every minute (catches midnight transition)
+setInterval(() => {
+  checkWeekReset();
+  if (activeTab === 'today') renderToday();
+}, 60000);
+</script>
+</body>
+</html>
