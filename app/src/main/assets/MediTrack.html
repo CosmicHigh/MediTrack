@@ -338,6 +338,81 @@
     /* ── Toast ── */
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: white; border-radius: 24px; padding: 10px 22px; font-size: 14px; font-weight: 700; white-space: nowrap; opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ══════════════════════════════
+       SETTINGS TAB
+    ══════════════════════════════ */
+    .settings-header { margin-bottom: 22px; }
+    .settings-header h2 { font-size: 24px; font-weight: 900; color: var(--text); }
+    .settings-header p  { font-size: 14px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+
+    .time-setting-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow);
+    }
+    .time-setting-left { display: flex; align-items: center; gap: 12px; }
+    .time-setting-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .time-setting-icon.morning   { background: var(--morning-bg); }
+    .time-setting-icon.afternoon { background: var(--afternoon-bg); }
+    .time-setting-icon.evening   { background: var(--evening-bg); }
+    .time-setting-icon.night     { background: var(--night-bg); }
+    .time-setting-label { font-size: 16px; font-weight: 700; color: var(--text); }
+    .time-setting-sub   { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 1px; }
+
+    .time-picker-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .time-select {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 4px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--teal);
+      background: var(--surface);
+      outline: none;
+      cursor: pointer;
+      text-align: center;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .time-select:focus { border-color: var(--teal); }
+    .time-select.hr  { width: 52px; }
+    .time-select.min { width: 52px; }
+    .time-select.ap  { width: 58px; }
+    .time-colon {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .settings-note {
+      background: var(--teal-pale);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--teal);
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -355,6 +430,7 @@
   <button onclick="switchTab('week')">Week</button>
   <button onclick="switchTab('add')">Add</button>
   <button onclick="switchTab('meds')">Meds</button>
+  <button onclick="switchTab('settings')">⏰</button>
 </nav>
 
 <main>
@@ -462,193 +538,437 @@
       <p>Tap to set up a new medication.</p>
     </div>
   </div>
+  <!-- ── SETTINGS VIEW ── -->
+  <div class="view" id="view-settings">
+    <div class="settings-header">
+      <h2>⏰ Reminder Times</h2>
+      <p>Set when you want to be reminded for each slot.</p>
+    </div>
 
+    <div class="time-setting-card">
+      <div class="time-setting-left">
+        <div class="time-setting-icon morning">🌅</div>
+        <div>
+          <div class="time-setting-label">সকাল</div>
+          <div class="time-setting-sub">Morning</div>
+        </div>
+      </div>
+      <div class="time-picker-group">
+        <select class="time-select hr" id="hr-morning" onchange="saveSlotTimes()"></select>
+        <span class="time-colon">:</span>
+        <select class="time-select min" id="min-morning" onchange="saveSlotTimes()"></select>
+        <select class="time-select ap" id="ap-morning" onchange="saveSlotTimes()">
+          <option value="AM">AM</option><option value="PM">PM</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="time-setting-card">
+      <div class="time-setting-left">
+        <div class="time-setting-icon afternoon">☀️</div>
+        <div>
+          <div class="time-setting-label">দুপুর</div>
+          <div class="time-setting-sub">Afternoon</div>
+        </div>
+      </div>
+      <div class="time-picker-group">
+        <select class="time-select hr" id="hr-afternoon" onchange="saveSlotTimes()"></select>
+        <span class="time-colon">:</span>
+        <select class="time-select min" id="min-afternoon" onchange="saveSlotTimes()"></select>
+        <select class="time-select ap" id="ap-afternoon" onchange="saveSlotTimes()">
+          <option value="AM">AM</option><option value="PM">PM</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="time-setting-card">
+      <div class="time-setting-left">
+        <div class="time-setting-icon evening">🌆</div>
+        <div>
+          <div class="time-setting-label">বিকাল</div>
+          <div class="time-setting-sub">Evening</div>
+        </div>
+      </div>
+      <div class="time-picker-group">
+        <select class="time-select hr" id="hr-evening" onchange="saveSlotTimes()"></select>
+        <span class="time-colon">:</span>
+        <select class="time-select min" id="min-evening" onchange="saveSlotTimes()"></select>
+        <select class="time-select ap" id="ap-evening" onchange="saveSlotTimes()">
+          <option value="AM">AM</option><option value="PM">PM</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="time-setting-card">
+      <div class="time-setting-left">
+        <div class="time-setting-icon night">🌙</div>
+        <div>
+          <div class="time-setting-label">রাত</div>
+          <div class="time-setting-sub">Night</div>
+        </div>
+      </div>
+      <div class="time-picker-group">
+        <select class="time-select hr" id="hr-night" onchange="saveSlotTimes()"></select>
+        <span class="time-colon">:</span>
+        <select class="time-select min" id="min-night" onchange="saveSlotTimes()"></select>
+        <select class="time-select ap" id="ap-night" onchange="saveSlotTimes()">
+          <option value="AM">AM</option><option value="PM">PM</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-note">
+      💡 Changes are saved automatically. Reminders will ring at the times you set, even if the app is closed.
+    </div>
+  </div>
 </main>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Constants ──────────────────────────────────────────
-const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const DAYS_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // ── Constants ──────────────────────────────────────────
+  const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const DAYS_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-const SLOTS = [
-  { id: 'morning',   label: 'সকাল',  icon: '🌅', cls: 'slot-morning' },
-  { id: 'afternoon', label: 'দুপুর', icon: '☀️',  cls: 'slot-afternoon' },
-  { id: 'evening',   label: 'বিকাল', icon: '🌆', cls: 'slot-evening' },
-  { id: 'night',     label: 'রাত',   icon: '🌙', cls: 'slot-night' },
-];
+  const SLOTS = [
+    { id: 'morning',   label: 'সকাল',  icon: '🌅', cls: 'slot-morning' },
+    { id: 'afternoon', label: 'দুপুর', icon: '☀️',  cls: 'slot-afternoon' },
+    { id: 'evening',   label: 'বিকাল', icon: '🌆', cls: 'slot-evening' },
+    { id: 'night',     label: 'রাত',   icon: '🌙', cls: 'slot-night' },
+  ];
 
-// Day order: Mon → Sun (matches picker display)
-const DAY_ORDER = ['mon','tue','wed','thu','fri','sat','sun'];
-// JS getDay() → day key
-const JS_TO_DAY = ['sun','mon','tue','wed','thu','fri','sat'];
-const DAY_ABBR  = { mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', sun:'Sun' };
+  const DAY_ORDER = ['mon','tue','wed','thu','fri','sat','sun'];
+  const JS_TO_DAY = ['sun','mon','tue','wed','thu','fri','sat'];
+  const DAY_ABBR  = { mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', sun:'Sun' };
 
-// ── Helpers ────────────────────────────────────────────
-function uuid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+  // ── Helpers ────────────────────────────────────────────
+  function uuid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
-function getMondayOf(date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = (day === 0) ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0,0,0,0);
-  return d;
-}
+  function getMondayOf(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = (day === 0) ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0,0,0,0);
+    return d;
+  }
 
-function dateKey(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
+  function dateKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
 
-function todayKey() { return dateKey(new Date()); }
+  function todayKey() { return dateKey(new Date()); }
 
-function getDayKeyFromStr(dayStr) {
-  // Parse YYYY-MM-DD safely without timezone shifts
-  const [y,m,d] = dayStr.split('-').map(Number);
-  const date = new Date(y, m-1, d);
-  return JS_TO_DAY[date.getDay()];
-}
+  function getDayKeyFromStr(dayStr) {
+    const [y,m,d] = dayStr.split('-').map(Number);
+    const date = new Date(y, m-1, d);
+    return JS_TO_DAY[date.getDay()];
+  }
 
-function isMedScheduledForDay(med, dayKey) {
-  // Backwards compat: old medicines without days show every day
-  if (!med.days || med.days.length === 0) return true;
-  return med.days.includes(dayKey);
-}
+  function isMedScheduledForDay(med, dayKey) {
+    if (!med.days || med.days.length === 0) return true;
+    return med.days.includes(dayKey);
+  }
 
-function formatDays(days) {
-  if (!days || days.length === 7) return 'Daily';
-  return DAY_ORDER.filter(d => days.includes(d)).map(d => DAY_ABBR[d]).join(', ');
-}
+  function formatDays(days) {
+    if (!days || days.length === 7) return 'Daily';
+    return DAY_ORDER.filter(d => days.includes(d)).map(d => DAY_ABBR[d]).join(', ');
+  }
 
-function getNextSlotLabel(todayStr, checkKeys, dayKey) {
-  for (const slot of SLOTS) {
-    const meds = state.medicines.filter(m =>
-      m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
-    );
-    if (meds.some(m => !checkKeys[m.id + '_' + slot.id])) {
-      return slot.icon + ' ' + slot.label;
+  function getNextSlotLabel(todayStr, checkKeys, dayKey) {
+    for (const slot of SLOTS) {
+      const meds = state.medicines.filter(m =>
+        m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
+      );
+      if (meds.some(m => !checkKeys[m.id + '_' + slot.id])) {
+        return slot.icon + ' ' + slot.label;
+      }
+    }
+    return '';
+  }
+
+  // ── Android Native Bridge ──────────────────────────────
+  // Syncs medicine data to the native Android alarm scheduler
+  // so reminders fire even when the app is closed.
+  function syncToAndroid() {
+    try {
+      if (window.Android && typeof Android.onMedicinesChanged === 'function') {
+        Android.onMedicinesChanged(JSON.stringify(state.medicines));
+      }
+    } catch(e) {
+      console.log('Android bridge sync: ' + e);
     }
   }
-  return '';
-}
 
-// ── State ──────────────────────────────────────────────
-let state = {
-  medicines: [],   // [{id, name, doses:[{time,food}], days:['mon',...]}]
-  weekStart: null, // 'YYYY-MM-DD' of Monday
-  checks:    {}    // { 'YYYY-MM-DD': { 'medId_slotId': true } }
-};
+  // ── State ──────────────────────────────────────────────
+  let state = {
+    medicines: [],
+    weekStart: null,
+    checks:    {}
+  };
 
-function loadState() {
-  try {
-    const s = localStorage.getItem('meditrack_state');
-    if (s) state = JSON.parse(s);
-    // Migrate old medicines without days → all days
-    state.medicines = state.medicines.map(m => ({
-      ...m,
-      days: m.days || [...DAY_ORDER]
-    }));
-  } catch(e) {}
-  checkWeekReset();
-}
-
-function saveState() {
-  localStorage.setItem('meditrack_state', JSON.stringify(state));
-}
-
-// ── Weekly Reset ───────────────────────────────────────
-// ONLY clears the tick history. Medicines (including frequency) are NEVER touched.
-function checkWeekReset() {
-  const monday = getMondayOf(new Date());
-  const currentWeekStart = dateKey(monday);
-  if (state.weekStart !== currentWeekStart) {
-    state.weekStart = currentWeekStart;
-    state.checks = {};    // ← only checks cleared, medicines untouched
-    saveState();
+  function loadState() {
+    try {
+      const s = localStorage.getItem('meditrack_state');
+      if (s) state = JSON.parse(s);
+      state.medicines = state.medicines.map(m => ({
+        ...m,
+        days: m.days || [...DAY_ORDER]
+      }));
+    } catch(e) {}
+    checkWeekReset();
   }
-}
 
-// ── Tab Switching ──────────────────────────────────────
-let activeTab = 'today';
+  function saveState() {
+    localStorage.setItem('meditrack_state', JSON.stringify(state));
+    // ★ Sync to native Android alarm system whenever state changes
+    syncToAndroid();
+  }
 
-function switchTab(tab) {
+  // ── Weekly Reset ───────────────────────────────────────
+  function checkWeekReset() {
+    const monday = getMondayOf(new Date());
+    const currentWeekStart = dateKey(monday);
+    if (state.weekStart !== currentWeekStart) {
+      state.weekStart = currentWeekStart;
+      state.checks = {};
+      saveState();
+    }
+  }
+
+  // ── Tab Switching ──────────────────────────────────────
+  let activeTab = 'today';
+
+  function switchTab(tab) {
   activeTab = tab;
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + tab).classList.add('active');
   document.querySelectorAll('nav.tabs button').forEach((b,i) => {
-    b.classList.toggle('active', ['today','week','add','meds'][i] === tab);
+    b.classList.toggle('active', ['today','week','add','meds','settings'][i] === tab);
   });
   renderAll();
 }
 
-// ── Rendering ──────────────────────────────────────────
-function renderAll() {
+  // ── Rendering ──────────────────────────────────────────
+  function renderAll() {
   updateHeader();
   if (activeTab === 'today') renderToday();
   if (activeTab === 'week')  renderWeek();
-  if (activeTab === 'add')   { /* form is static HTML, nothing to re-render */ }
   if (activeTab === 'meds')  renderMeds();
+  if (activeTab === 'settings') loadSlotTimes();
 }
 
-function updateHeader() {
-  const now = new Date();
-  document.getElementById('headerDate').textContent =
-    DAYS_S[now.getDay()] + ', ' + MONTHS[now.getMonth()] + ' ' + now.getDate();
-  const monday = getMondayOf(now);
-  const sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
-  document.getElementById('weekLabel').textContent =
-    'Week of ' + MONTHS[monday.getMonth()] + ' ' + monday.getDate() +
-    ' – ' + MONTHS[sunday.getMonth()] + ' ' + sunday.getDate();
-}
+  function updateHeader() {
+    const now = new Date();
+    document.getElementById('headerDate').textContent =
+      DAYS_S[now.getDay()] + ', ' + MONTHS[now.getMonth()] + ' ' + now.getDate();
+    const monday = getMondayOf(now);
+    const sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
+    document.getElementById('weekLabel').textContent =
+      'Week of ' + MONTHS[monday.getMonth()] + ' ' + monday.getDate() +
+      ' – ' + MONTHS[sunday.getMonth()] + ' ' + sunday.getDate();
+  }
 
-// ── Build Slots HTML ───────────────────────────────────
-// Filters by day of week using medicine.days[]
-function buildSlotsHTML(dayStr, interactive) {
-  const dayKey = getDayKeyFromStr(dayStr);
-  let html = '';
-  let totalDoses = 0, doneDoses = 0;
+  // ── Build Slots HTML ───────────────────────────────────
+  function buildSlotsHTML(dayStr, interactive) {
+    const dayKey = getDayKeyFromStr(dayStr);
+    let html = '';
+    let totalDoses = 0, doneDoses = 0;
 
-  for (const slot of SLOTS) {
-    // Only include medicines scheduled for this day
-    const meds = state.medicines.filter(m =>
-      m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
-    );
-    if (meds.length === 0) continue;
+    for (const slot of SLOTS) {
+      const meds = state.medicines.filter(m =>
+        m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
+      );
+      if (meds.length === 0) continue;
 
-    const checkKeys = state.checks[dayStr] || {};
-    let checkedCount = 0;
-    meds.forEach(m => {
-      if (checkKeys[m.id + '_' + slot.id]) { checkedCount++; doneDoses++; }
-      totalDoses++;
-    });
+      const checkKeys = state.checks[dayStr] || {};
+      let checkedCount = 0;
+      meds.forEach(m => {
+        if (checkKeys[m.id + '_' + slot.id]) { checkedCount++; doneDoses++; }
+        totalDoses++;
+      });
 
-    html += `<div class="slot-section" data-slot="${slot.id}">
-      <div class="slot-header ${slot.cls}">
-        <div class="slot-icon">${slot.icon}</div>
-        <div class="slot-title">${slot.label}</div>
-        <div class="slot-count">${checkedCount}/${meds.length}</div>
-      </div>`;
-
-    for (const med of meds) {
-      const key     = med.id + '_' + slot.id;
-      const checked = !!(checkKeys[key]);
-      const dose    = med.doses.find(d => d.time === slot.id);
-      const foodTag = dose
-        ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
-        : '';
-
-      if (interactive) {
-        html += `<div class="med-card ${checked ? 'checked' : ''}" id="card-${dayStr}-${key}">
-          <div class="med-checkbox ${checked ? 'checked' : ''}" onclick="toggleCheck('${dayStr}','${key}')"></div>
-          <div class="med-info">
-            <div class="med-name">${med.name}</div>
-            <div class="med-tags">${foodTag}</div>
-          </div>
+      html += `<div class="slot-section" data-slot="${slot.id}">
+        <div class="slot-header ${slot.cls}">
+          <div class="slot-icon">${slot.icon}</div>
+          <div class="slot-title">${slot.label}</div>
+          <div class="slot-count">${checkedCount}/${meds.length}</div>
         </div>`;
-      } else {
-        html += `<div class="med-card ${checked ? 'checked' : ''}">
+
+      for (const med of meds) {
+        const key     = med.id + '_' + slot.id;
+        const checked = !!(checkKeys[key]);
+        const dose    = med.doses.find(d => d.time === slot.id);
+        const foodTag = dose
+          ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
+          : '';
+
+        if (interactive) {
+          html += `<div class="med-card ${checked ? 'checked' : ''}" id="card-${dayStr}-${key}">
+            <div class="med-checkbox ${checked ? 'checked' : ''}" onclick="toggleCheck('${dayStr}','${key}')"></div>
+            <div class="med-info">
+              <div class="med-name">${med.name}</div>
+              <div class="med-tags">${foodTag}</div>
+            </div>
+          </div>`;
+        } else {
+          html += `<div class="med-card ${checked ? 'checked' : ''}">
+            <div class="med-info">
+              <div class="med-name">${med.name}</div>
+              <div class="med-tags">${foodTag}</div>
+            </div>
+          </div>`;
+        }
+      }
+      html += `</div>`;
+    }
+
+    if (!html) {
+      html = `<div class="no-medicines">
+        <div class="big-icon">💊</div>
+        <p>No medicines scheduled for today.<br>Go to <strong>Add</strong> tab to add some.</p>
+      </div>`;
+    }
+
+    return { html, totalDoses, doneDoses };
+  }
+
+  // ── Render Today ───────────────────────────────────────
+  function renderToday() {
+    const today  = todayKey();
+    const dayKey = getDayKeyFromStr(today);
+    const { html, totalDoses, doneDoses } = buildSlotsHTML(today, true);
+
+    document.getElementById('todaySlots').innerHTML = html;
+
+    const card     = document.getElementById('progressCard');
+    const allClear = document.getElementById('allClear');
+
+    if (totalDoses === 0) {
+      card.style.display = 'none';
+      allClear.classList.remove('show');
+      return;
+    }
+
+    const left   = totalDoses - doneDoses;
+    const pct    = Math.round((doneDoses / totalDoses) * 100);
+    const now    = new Date();
+    const checkKeys = state.checks[today] || {};
+
+    document.getElementById('pcDay').textContent =
+      DAYS[now.getDay()].toUpperCase() + ', ' + now.getDate() + ' · TODAY';
+    document.getElementById('pcMain').textContent =
+      left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
+    document.getElementById('pcSub').textContent =
+      left > 0 ? 'Next: ' + (getNextSlotLabel(today, checkKeys, dayKey) || '') : '';
+    document.getElementById('pcBarFill').style.width = pct + '%';
+    document.getElementById('pcCompleted').textContent =
+      doneDoses + ' OF ' + totalDoses + ' COMPLETED';
+
+    if (doneDoses === totalDoses && totalDoses > 0) {
+      allClear.classList.add('show');
+      card.style.display = 'none';
+      document.getElementById('todaySlots').style.display = 'none';
+      buildAllClearBody();
+    } else {
+      allClear.classList.remove('show');
+      card.style.display = 'block';
+      document.getElementById('todaySlots').style.display = 'block';
+    }
+  }
+
+  // ── Toggle Check ───────────────────────────────────────
+  function toggleCheck(dayStr, key) {
+    if (!state.checks[dayStr]) state.checks[dayStr] = {};
+    state.checks[dayStr][key] = !state.checks[dayStr][key];
+    saveState();
+    renderToday();
+  }
+
+  // ── Update Slot Counter ────
+  function updateSlotCounter(dayStr, slotId) {
+    const dayKey    = getDayKeyFromStr(dayStr);
+    const checkKeys = state.checks[dayStr] || {};
+    const meds      = state.medicines.filter(m =>
+      m.doses.some(d => d.time === slotId) && isMedScheduledForDay(m, dayKey)
+    );
+    const done = meds.filter(m => checkKeys[m.id + '_' + slotId]).length;
+    const sec = document.querySelector(`#todaySlots .slot-section[data-slot="${slotId}"]`);
+    if (sec) {
+      const counter = sec.querySelector('.slot-count');
+      if (counter) counter.textContent = done + '/' + meds.length;
+    }
+  }
+
+  // ── Update Progress Card ───────────────────────────────
+  function updateProgressCard(dayStr) {
+    const dayKey    = getDayKeyFromStr(dayStr);
+    const checkKeys = state.checks[dayStr] || {};
+    let totalDoses = 0, doneDoses = 0;
+
+    for (const slot of SLOTS) {
+      const meds = state.medicines.filter(m =>
+        m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
+      );
+      meds.forEach(m => {
+        totalDoses++;
+        if (checkKeys[m.id + '_' + slot.id]) doneDoses++;
+      });
+    }
+    if (totalDoses === 0) return;
+
+    const left = totalDoses - doneDoses;
+    const pct  = Math.round((doneDoses / totalDoses) * 100);
+
+    document.getElementById('pcMain').textContent =
+      left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
+    document.getElementById('pcSub').textContent =
+      left > 0 ? 'Next: ' + (getNextSlotLabel(dayStr, checkKeys, dayKey) || '') : '';
+    document.getElementById('pcBarFill').style.width = pct + '%';
+    document.getElementById('pcCompleted').textContent =
+      doneDoses + ' OF ' + totalDoses + ' COMPLETED';
+
+    if (doneDoses === totalDoses) {
+      document.getElementById('allClear').classList.add('show');
+      document.getElementById('progressCard').style.display = 'none';
+      document.getElementById('todaySlots').style.display = 'none';
+      buildAllClearBody();
+    } else {
+      document.getElementById('allClear').classList.remove('show');
+      document.getElementById('progressCard').style.display = 'block';
+      document.getElementById('todaySlots').style.display = 'block';
+    }
+  }
+
+  // ── All Clear Collapsible ──────────────────────────────
+  function toggleAllClearExpand() {
+    const body = document.getElementById('allClearBody');
+    const hint = document.querySelector('.ac-hint');
+    const isOpen = body.classList.toggle('open');
+    hint.textContent = isOpen ? '▲ Tap to collapse' : '▼ Tap to review or correct';
+  }
+
+  function buildAllClearBody() {
+    const today    = todayKey();
+    const dayKey   = getDayKeyFromStr(today);
+    const checkKeys = state.checks[today] || {};
+    let html = '';
+
+    for (const slot of SLOTS) {
+      const meds = state.medicines.filter(m =>
+        m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
+      );
+      if (meds.length === 0) continue;
+      html += `<div class="slot-title-ac">${slot.icon} ${slot.label}</div>`;
+      for (const med of meds) {
+        const key  = med.id + '_' + slot.id;
+        const dose = med.doses.find(d => d.time === slot.id);
+        const foodTag = dose
+          ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
+          : '';
+        html += `<div class="med-card checked" id="card-${today}-${key}">
+          <div class="med-checkbox checked" onclick="toggleCheck('${today}','${key}')"></div>
           <div class="med-info">
             <div class="med-name">${med.name}</div>
             <div class="med-tags">${foodTag}</div>
@@ -656,408 +976,334 @@ function buildSlotsHTML(dayStr, interactive) {
         </div>`;
       }
     }
-    html += `</div>`;
+    document.getElementById('allClearBody').innerHTML = html;
   }
 
-  if (!html) {
-    html = `<div class="no-medicines">
-      <div class="big-icon">💊</div>
-      <p>No medicines scheduled for today.<br>Go to <strong>Add</strong> tab to add some.</p>
-    </div>`;
-  }
+  // ── Week View ──────────────────────────────────────────
+  let selectedWeekDay = null;
 
-  return { html, totalDoses, doneDoses };
-}
+  function renderWeek() {
+    const today    = new Date();
+    const monday   = getMondayOf(today);
+    const todayStr = dateKey(today);
+    let stripHtml  = '';
 
-// ── Render Today ───────────────────────────────────────
-function renderToday() {
-  const today  = todayKey();
-  const dayKey = getDayKeyFromStr(today);
-  const { html, totalDoses, doneDoses } = buildSlotsHTML(today, true);
-
-  document.getElementById('todaySlots').innerHTML = html;
-
-  const card     = document.getElementById('progressCard');
-  const allClear = document.getElementById('allClear');
-
-  if (totalDoses === 0) {
-    card.style.display = 'none';
-    allClear.classList.remove('show');
-    return;
-  }
-
-  // Update big progress card
-  const left   = totalDoses - doneDoses;
-  const pct    = Math.round((doneDoses / totalDoses) * 100);
-  const now    = new Date();
-  const checkKeys = state.checks[today] || {};
-
-  document.getElementById('pcDay').textContent =
-    DAYS[now.getDay()].toUpperCase() + ', ' + now.getDate() + ' · TODAY';
-  document.getElementById('pcMain').textContent =
-    left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
-  document.getElementById('pcSub').textContent =
-    left > 0 ? 'Next: ' + (getNextSlotLabel(today, checkKeys, dayKey) || '') : '';
-  document.getElementById('pcBarFill').style.width = pct + '%';
-  document.getElementById('pcCompleted').textContent =
-    doneDoses + ' OF ' + totalDoses + ' COMPLETED';
-
-  if (doneDoses === totalDoses && totalDoses > 0) {
-    allClear.classList.add('show');
-    card.style.display = 'none';
-    document.getElementById('todaySlots').style.display = 'none';
-    buildAllClearBody();
-  } else {
-    allClear.classList.remove('show');
-    card.style.display = 'block';
-    document.getElementById('todaySlots').style.display = 'block';
-  }
-}
-
-// ── Toggle Check ───────────────────────────────────────
-// Single source of truth: always re-render from state. No partial DOM updates.
-function toggleCheck(dayStr, key) {
-  if (!state.checks[dayStr]) state.checks[dayStr] = {};
-  state.checks[dayStr][key] = !state.checks[dayStr][key];
-  saveState();
-  renderToday();
-}
-
-// ── Update Slot Counter (kept for reference, unused in toggleCheck) ────
-function updateSlotCounter(dayStr, slotId) {
-  const dayKey    = getDayKeyFromStr(dayStr);
-  const checkKeys = state.checks[dayStr] || {};
-  const meds      = state.medicines.filter(m =>
-    m.doses.some(d => d.time === slotId) && isMedScheduledForDay(m, dayKey)
-  );
-  const done = meds.filter(m => checkKeys[m.id + '_' + slotId]).length;
-  // Uses data-slot attribute — language-independent, never breaks
-  const sec = document.querySelector(`#todaySlots .slot-section[data-slot="${slotId}"]`);
-  if (sec) {
-    const counter = sec.querySelector('.slot-count');
-    if (counter) counter.textContent = done + '/' + meds.length;
-  }
-}
-
-// ── Update Progress Card ───────────────────────────────
-function updateProgressCard(dayStr) {
-  const dayKey    = getDayKeyFromStr(dayStr);
-  const checkKeys = state.checks[dayStr] || {};
-  let totalDoses = 0, doneDoses = 0;
-
-  for (const slot of SLOTS) {
-    const meds = state.medicines.filter(m =>
-      m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
-    );
-    meds.forEach(m => {
-      totalDoses++;
-      if (checkKeys[m.id + '_' + slot.id]) doneDoses++;
-    });
-  }
-  if (totalDoses === 0) return;
-
-  const left = totalDoses - doneDoses;
-  const pct  = Math.round((doneDoses / totalDoses) * 100);
-
-  document.getElementById('pcMain').textContent =
-    left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
-  document.getElementById('pcSub').textContent =
-    left > 0 ? 'Next: ' + (getNextSlotLabel(dayStr, checkKeys, dayKey) || '') : '';
-  document.getElementById('pcBarFill').style.width = pct + '%';
-  document.getElementById('pcCompleted').textContent =
-    doneDoses + ' OF ' + totalDoses + ' COMPLETED';
-
-  if (doneDoses === totalDoses) {
-    document.getElementById('allClear').classList.add('show');
-    document.getElementById('progressCard').style.display = 'none';
-    document.getElementById('todaySlots').style.display = 'none';
-    buildAllClearBody();
-  } else {
-    document.getElementById('allClear').classList.remove('show');
-    document.getElementById('progressCard').style.display = 'block';
-    document.getElementById('todaySlots').style.display = 'block';
-  }
-}
-
-// ── All Clear Collapsible ──────────────────────────────
-function toggleAllClearExpand() {
-  const body = document.getElementById('allClearBody');
-  const hint = document.querySelector('.ac-hint');
-  const isOpen = body.classList.toggle('open');
-  hint.textContent = isOpen ? '▲ Tap to collapse' : '▼ Tap to review or correct';
-}
-
-function buildAllClearBody() {
-  const today    = todayKey();
-  const dayKey   = getDayKeyFromStr(today);
-  const checkKeys = state.checks[today] || {};
-  let html = '';
-
-  for (const slot of SLOTS) {
-    const meds = state.medicines.filter(m =>
-      m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
-    );
-    if (meds.length === 0) continue;
-    html += `<div class="slot-title-ac">${slot.icon} ${slot.label}</div>`;
-    for (const med of meds) {
-      const key  = med.id + '_' + slot.id;
-      const dose = med.doses.find(d => d.time === slot.id);
-      const foodTag = dose
-        ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
-        : '';
-      html += `<div class="med-card checked" id="card-${today}-${key}">
-        <div class="med-checkbox checked" onclick="toggleCheck('${today}','${key}')"></div>
-        <div class="med-info">
-          <div class="med-name">${med.name}</div>
-          <div class="med-tags">${foodTag}</div>
-        </div>
+    for (let i = 0; i < 7; i++) {
+      const d    = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const dStr    = dateKey(d);
+      const isToday = dStr === todayStr;
+      const isActive = selectedWeekDay ? selectedWeekDay === dStr : isToday;
+      stripHtml += `<div class="day-btn ${isActive ? 'active' : ''} ${isToday ? 'today-dot' : ''}"
+        onclick="selectWeekDay('${dStr}')">
+        <div class="day-name">${DAYS_S[d.getDay()]}</div>
+        <div class="day-num">${d.getDate()}</div>
       </div>`;
     }
-  }
-  document.getElementById('allClearBody').innerHTML = html;
-}
+    document.getElementById('dayStrip').innerHTML = stripHtml;
 
-// ── Week View ──────────────────────────────────────────
-let selectedWeekDay = null;
-
-function renderWeek() {
-  const today    = new Date();
-  const monday   = getMondayOf(today);
-  const todayStr = dateKey(today);
-  let stripHtml  = '';
-
-  for (let i = 0; i < 7; i++) {
-    const d    = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    const dStr    = dateKey(d);
-    const isToday = dStr === todayStr;
-    const isActive = selectedWeekDay ? selectedWeekDay === dStr : isToday;
-    stripHtml += `<div class="day-btn ${isActive ? 'active' : ''} ${isToday ? 'today-dot' : ''}"
-      onclick="selectWeekDay('${dStr}')">
-      <div class="day-name">${DAYS_S[d.getDay()]}</div>
-      <div class="day-num">${d.getDate()}</div>
-    </div>`;
-  }
-  document.getElementById('dayStrip').innerHTML = stripHtml;
-
-  const selectedDay = selectedWeekDay || todayStr;
-  const { html } = buildSlotsHTML(selectedDay, false); // always read-only in week tab
-  document.getElementById('weekSlots').innerHTML = html;
-}
-
-function selectWeekDay(dStr) {
-  selectedWeekDay = dStr;
-  renderWeek();
-}
-
-// ── Meds View ──────────────────────────────────────────
-function renderMeds() {
-  const list = document.getElementById('medicineList');
-  document.getElementById('medsCount').textContent =
-    state.medicines.length + ' Total';
-
-  if (state.medicines.length === 0) {
-    list.innerHTML = `<div class="no-medicines">
-      <div class="big-icon">🌿</div>
-      <p>No medicines yet.<br>Tap <strong>Add</strong> to get started.</p>
-    </div>`;
-    return;
+    const selectedDay = selectedWeekDay || todayStr;
+    const { html } = buildSlotsHTML(selectedDay, false);
+    document.getElementById('weekSlots').innerHTML = html;
   }
 
-  list.innerHTML = state.medicines.map(med => {
-    const food     = med.doses[0]?.food || 'before';
-    const badgeCls = food === 'before' ? 'badge-before' : 'badge-after';
-    const badgeTxt = food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে';
+  function selectWeekDay(dStr) {
+    selectedWeekDay = dStr;
+    renderWeek();
+  }
 
-    const timeChips = med.doses.map(d =>
-      `<span class="time-chip chip-${d.time}">${SLOTS.find(s=>s.id===d.time)?.icon} ${SLOTS.find(s=>s.id===d.time)?.label}</span>`
-    ).join('');
+  // ── Meds View ──────────────────────────────────────────
+  function renderMeds() {
+    const list = document.getElementById('medicineList');
+    document.getElementById('medsCount').textContent =
+      state.medicines.length + ' Total';
 
-    const daysText = formatDays(med.days);
-
-    return `<div class="med-plan-card">
-      <div class="med-plan-top">
-        <div>
-          <div class="med-plan-name-row">
-            <span class="med-dot"></span>
-            <span class="med-plan-name">${med.name}</span>
-          </div>
-        </div>
-        <span class="food-badge ${badgeCls}">${badgeTxt}</span>
-      </div>
-      <div class="med-plan-meta">
-        <div class="meta-row">
-          <div class="meta-item">
-            <span class="meta-label">Time</span>
-            <div class="time-chips">${timeChips}</div>
-          </div>
-        </div>
-        <div class="meta-row">
-          <div class="meta-item">
-            <span class="meta-label">Frequency</span>
-            <span class="meta-value">${daysText}</span>
-          </div>
-        </div>
-      </div>
-      <div class="med-plan-actions">
-        <button class="btn-edit" onclick="editMedicine('${med.id}')">✏️ Edit</button>
-        <button class="btn-delete" onclick="removeMedicine('${med.id}')">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ── Add / Edit Form Logic ──────────────────────────────
-let selectedTimes = new Set();
-let selectedFood  = null;
-let selectedDays  = new Set(DAY_ORDER); // default all days
-let editingMedId  = null;
-
-function toggleTime(btn) {
-  const t = btn.dataset.time;
-  selectedTimes.has(t) ? selectedTimes.delete(t) : selectedTimes.add(t);
-  btn.classList.toggle('selected', selectedTimes.has(t));
-}
-
-function toggleDay(btn) {
-  const d = btn.dataset.day;
-  selectedDays.has(d) ? selectedDays.delete(d) : selectedDays.add(d);
-  btn.classList.toggle('selected', selectedDays.has(d));
-  updateAllDaysBtn();
-}
-
-function selectAllDays() {
-  DAY_ORDER.forEach(d => selectedDays.add(d));
-  document.querySelectorAll('[data-day]').forEach(b => b.classList.add('selected'));
-  document.getElementById('allDaysBtn').classList.add('selected');
-}
-
-function updateAllDaysBtn() {
-  const allSelected = DAY_ORDER.every(d => selectedDays.has(d));
-  document.getElementById('allDaysBtn').classList.toggle('selected', allSelected);
-}
-
-function selectFood(value) {
-  selectedFood = value;
-  document.getElementById('food-before').classList.toggle('selected', value === 'before');
-  document.getElementById('food-after').classList.toggle('selected', value === 'after');
-}
-
-function addOrUpdateMedicine() {
-  const name = document.getElementById('medNameInput').value.trim();
-  if (!name)                 { showToast('Please enter a medicine name'); return; }
-  if (selectedTimes.size === 0) { showToast('Please select at least one time slot'); return; }
-  if (selectedDays.size === 0)  { showToast('Please select at least one day'); return; }
-  if (!selectedFood)            { showToast('Please select food timing'); return; }
-
-  const doses = [...selectedTimes].map(t => ({ time: t, food: selectedFood }));
-  const days  = DAY_ORDER.filter(d => selectedDays.has(d));
-
-  if (editingMedId) {
-    const idx = state.medicines.findIndex(m => m.id === editingMedId);
-    if (idx !== -1) {
-      state.medicines[idx] = { id: editingMedId, name, doses, days };
+    if (state.medicines.length === 0) {
+      list.innerHTML = `<div class="no-medicines">
+        <div class="big-icon">🌿</div>
+        <p>No medicines yet.<br>Tap <strong>Add</strong> to get started.</p>
+      </div>`;
+      return;
     }
-    showToast('✅ Medicine updated!');
-  } else {
-    if (state.medicines.some(m => m.name.toLowerCase() === name.toLowerCase())) {
-      showToast('Medicine already exists'); return;
-    }
-    state.medicines.push({ id: uuid(), name, doses, days });
-    showToast('✅ ' + name + ' added!');
+
+    list.innerHTML = state.medicines.map(med => {
+      const food     = med.doses[0]?.food || 'before';
+      const badgeCls = food === 'before' ? 'badge-before' : 'badge-after';
+      const badgeTxt = food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে';
+
+      const timeChips = med.doses.map(d =>
+        `<span class="time-chip chip-${d.time}">${SLOTS.find(s=>s.id===d.time)?.icon} ${SLOTS.find(s=>s.id===d.time)?.label}</span>`
+      ).join('');
+
+      const daysText = formatDays(med.days);
+
+      return `<div class="med-plan-card">
+        <div class="med-plan-top">
+          <div>
+            <div class="med-plan-name-row">
+              <span class="med-dot"></span>
+              <span class="med-plan-name">${med.name}</span>
+            </div>
+          </div>
+          <span class="food-badge ${badgeCls}">${badgeTxt}</span>
+        </div>
+        <div class="med-plan-meta">
+          <div class="meta-row">
+            <div class="meta-item">
+              <span class="meta-label">Time</span>
+              <div class="time-chips">${timeChips}</div>
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="meta-item">
+              <span class="meta-label">Frequency</span>
+              <span class="meta-value">${daysText}</span>
+            </div>
+          </div>
+        </div>
+        <div class="med-plan-actions">
+          <button class="btn-edit" onclick="editMedicine('${med.id}')">✏️ Edit</button>
+          <button class="btn-delete" onclick="removeMedicine('${med.id}')">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
   }
 
-  saveState();
-  resetAddForm();
-  switchTab('meds');
-}
+  // ── Add / Edit Form Logic ──────────────────────────────
+  let selectedTimes = new Set();
+  let selectedFood  = null;
+  let selectedDays  = new Set(DAY_ORDER);
+  let editingMedId  = null;
 
-function editMedicine(id) {
-  const med = state.medicines.find(m => m.id === id);
-  if (!med) return;
-  editingMedId = id;
+  function toggleTime(btn) {
+    const t = btn.dataset.time;
+    selectedTimes.has(t) ? selectedTimes.delete(t) : selectedTimes.add(t);
+    btn.classList.toggle('selected', selectedTimes.has(t));
+  }
 
-  document.getElementById('medNameInput').value = med.name;
+  function toggleDay(btn) {
+    const d = btn.dataset.day;
+    selectedDays.has(d) ? selectedDays.delete(d) : selectedDays.add(d);
+    btn.classList.toggle('selected', selectedDays.has(d));
+    updateAllDaysBtn();
+  }
 
-  selectedTimes = new Set(med.doses.map(d => d.time));
-  document.querySelectorAll('[data-time]').forEach(b =>
-    b.classList.toggle('selected', selectedTimes.has(b.dataset.time))
-  );
+  function selectAllDays() {
+    DAY_ORDER.forEach(d => selectedDays.add(d));
+    document.querySelectorAll('[data-day]').forEach(b => b.classList.add('selected'));
+    document.getElementById('allDaysBtn').classList.add('selected');
+  }
 
-  selectedFood = med.doses[0]?.food || null;
-  document.getElementById('food-before').classList.toggle('selected', selectedFood === 'before');
-  document.getElementById('food-after').classList.toggle('selected', selectedFood === 'after');
+  function updateAllDaysBtn() {
+    const allSelected = DAY_ORDER.every(d => selectedDays.has(d));
+    document.getElementById('allDaysBtn').classList.toggle('selected', allSelected);
+  }
 
-  const days = med.days || [...DAY_ORDER];
-  selectedDays = new Set(days);
-  document.querySelectorAll('[data-day]').forEach(b =>
-    b.classList.toggle('selected', selectedDays.has(b.dataset.day))
-  );
-  updateAllDaysBtn();
+  function selectFood(value) {
+    selectedFood = value;
+    document.getElementById('food-before').classList.toggle('selected', value === 'before');
+    document.getElementById('food-after').classList.toggle('selected', value === 'after');
+  }
 
-  document.getElementById('addSubmitBtn').textContent = 'Update Medicine';
-  document.getElementById('addFormTitle').textContent = 'Edit Medicine';
-  document.getElementById('addFormSub').textContent   = 'Update the medication details.';
-  switchTab('add');
-}
+  function addOrUpdateMedicine() {
+    const name = document.getElementById('medNameInput').value.trim();
+    if (!name)                 { showToast('Please enter a medicine name'); return; }
+    if (selectedTimes.size === 0) { showToast('Please select at least one time slot'); return; }
+    if (selectedDays.size === 0)  { showToast('Please select at least one day'); return; }
+    if (!selectedFood)            { showToast('Please select food timing'); return; }
 
-function removeMedicine(id) {
-  const med = state.medicines.find(m => m.id === id);
-  if (!med) return;
-  state.medicines = state.medicines.filter(m => m.id !== id);
-  Object.keys(state.checks).forEach(day => {
-    Object.keys(state.checks[day] || {}).forEach(k => {
-      if (k.startsWith(id + '_')) delete state.checks[day][k];
+    const doses = [...selectedTimes].map(t => ({ time: t, food: selectedFood }));
+    const days  = DAY_ORDER.filter(d => selectedDays.has(d));
+
+    if (editingMedId) {
+      const idx = state.medicines.findIndex(m => m.id === editingMedId);
+      if (idx !== -1) {
+        state.medicines[idx] = { id: editingMedId, name, doses, days };
+      }
+      showToast('✅ Medicine updated!');
+    } else {
+      if (state.medicines.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+        showToast('Medicine already exists'); return;
+      }
+      state.medicines.push({ id: uuid(), name, doses, days });
+      showToast('✅ ' + name + ' added!');
+    }
+
+    saveState();
+    resetAddForm();
+    switchTab('meds');
+  }
+
+  function editMedicine(id) {
+    const med = state.medicines.find(m => m.id === id);
+    if (!med) return;
+    editingMedId = id;
+
+    document.getElementById('medNameInput').value = med.name;
+
+    selectedTimes = new Set(med.doses.map(d => d.time));
+    document.querySelectorAll('[data-time]').forEach(b =>
+      b.classList.toggle('selected', selectedTimes.has(b.dataset.time))
+    );
+
+    selectedFood = med.doses[0]?.food || null;
+    document.getElementById('food-before').classList.toggle('selected', selectedFood === 'before');
+    document.getElementById('food-after').classList.toggle('selected', selectedFood === 'after');
+
+    const days = med.days || [...DAY_ORDER];
+    selectedDays = new Set(days);
+    document.querySelectorAll('[data-day]').forEach(b =>
+      b.classList.toggle('selected', selectedDays.has(b.dataset.day))
+    );
+    updateAllDaysBtn();
+
+    document.getElementById('addSubmitBtn').textContent = 'Update Medicine';
+    document.getElementById('addFormTitle').textContent = 'Edit Medicine';
+    document.getElementById('addFormSub').textContent   = 'Update the medication details.';
+    switchTab('add');
+  }
+
+  function removeMedicine(id) {
+    const med = state.medicines.find(m => m.id === id);
+    if (!med) return;
+    state.medicines = state.medicines.filter(m => m.id !== id);
+    Object.keys(state.checks).forEach(day => {
+      Object.keys(state.checks[day] || {}).forEach(k => {
+        if (k.startsWith(id + '_')) delete state.checks[day][k];
+      });
     });
+    saveState();
+    renderMeds();
+    showToast('🗑 ' + med.name + ' removed');
+  }
+
+  function resetAddForm() {
+    document.getElementById('medNameInput').value = '';
+    selectedTimes.clear();
+    selectedFood  = null;
+    selectedDays  = new Set(DAY_ORDER);
+    editingMedId  = null;
+
+    document.querySelectorAll('[data-time]').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('[data-day]').forEach(b  => b.classList.add('selected'));
+    document.getElementById('allDaysBtn').classList.add('selected');
+    document.getElementById('food-before').classList.remove('selected');
+    document.getElementById('food-after').classList.remove('selected');
+    document.getElementById('addSubmitBtn').textContent  = 'Add Medicine';
+    document.getElementById('addFormTitle').textContent  = 'Add Medicine';
+    document.getElementById('addFormSub').textContent    = 'Set up a daily medication entry.';
+  }
+
+  // ── Toast ──────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ── Slot Time Settings ─────────────────────────────────
+const SLOT_IDS = ['morning','afternoon','evening','night'];
+const DEFAULT_TIMES = { morning:'08:00', afternoon:'13:00', evening:'18:00', night:'22:00' };
+
+// Populate hour (1–12) and minute (00–55) dropdowns once
+function initTimePickers() {
+  SLOT_IDS.forEach(slot => {
+    const hrSel  = document.getElementById('hr-' + slot);
+    const minSel = document.getElementById('min-' + slot);
+    hrSel.innerHTML = '';
+    minSel.innerHTML = '';
+    for (let h = 1; h <= 12; h++) {
+      const opt = document.createElement('option');
+      opt.value = h;
+      opt.textContent = String(h).padStart(2, '0');
+      hrSel.appendChild(opt);
+    }
+    for (let m = 0; m < 60; m += 5) {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = String(m).padStart(2, '0');
+      minSel.appendChild(opt);
+    }
   });
-  saveState();
-  renderMeds();
-  showToast('🗑 ' + med.name + ' removed');
 }
 
-function resetAddForm() {
-  document.getElementById('medNameInput').value = '';
-  selectedTimes.clear();
-  selectedFood  = null;
-  selectedDays  = new Set(DAY_ORDER);
-  editingMedId  = null;
-
-  document.querySelectorAll('[data-time]').forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll('[data-day]').forEach(b  => b.classList.add('selected'));
-  document.getElementById('allDaysBtn').classList.add('selected');
-  document.getElementById('food-before').classList.remove('selected');
-  document.getElementById('food-after').classList.remove('selected');
-  document.getElementById('addSubmitBtn').textContent  = 'Add Medicine';
-  document.getElementById('addFormTitle').textContent  = 'Add Medicine';
-  document.getElementById('addFormSub').textContent    = 'Set up a daily medication entry.';
+// Convert 24h "HH:MM" → set the 12h selects
+function set12hFrom24h(slot, time24) {
+  const [h24, m] = (time24 || DEFAULT_TIMES[slot]).split(':').map(Number);
+  const isPM = h24 >= 12;
+  let h12 = h24 % 12;
+  if (h12 === 0) h12 = 12;
+  // Round minute to nearest 5
+  const mRounded = Math.round(m / 5) * 5 >= 60 ? 55 : Math.round(m / 5) * 5;
+  document.getElementById('hr-' + slot).value  = h12;
+  document.getElementById('min-' + slot).value = mRounded;
+  document.getElementById('ap-' + slot).value  = isPM ? 'PM' : 'AM';
 }
 
-// ── Toast ──────────────────────────────────────────────
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+// Read 12h selects → return 24h "HH:MM"
+function get24hFromSelects(slot) {
+  let h = parseInt(document.getElementById('hr-' + slot).value);
+  const m = parseInt(document.getElementById('min-' + slot).value);
+  const ap = document.getElementById('ap-' + slot).value;
+  if (ap === 'AM' && h === 12) h = 0;
+  if (ap === 'PM' && h !== 12) h += 12;
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
 }
 
-// ── Service Worker ─────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  });
+function loadSlotTimes() {
+  let times = { ...DEFAULT_TIMES };
+  try {
+    const saved = localStorage.getItem('meditrack_slot_times');
+    if (saved) times = { ...DEFAULT_TIMES, ...JSON.parse(saved) };
+  } catch(e) {}
+  SLOT_IDS.forEach(slot => set12hFrom24h(slot, times[slot]));
 }
 
-// ── Init ──────────────────────────────────────────────
-loadState();
-renderAll();
+function saveSlotTimes() {
+  const times = {};
+  SLOT_IDS.forEach(slot => { times[slot] = get24hFromSelects(slot); });
+  localStorage.setItem('meditrack_slot_times', JSON.stringify(times));
+  syncTimesToAndroid(times);
+  showToast('⏰ Reminder time updated!');
+}
 
-// Re-check week reset every minute (catches midnight transition)
-setInterval(() => {
-  checkWeekReset();
-  if (activeTab === 'today') renderToday();
-}, 60000);
+function syncTimesToAndroid(times) {
+  try {
+    if (window.Android && typeof Android.onSlotTimesChanged === 'function') {
+      Android.onSlotTimesChanged(JSON.stringify(times));
+    }
+  } catch(e) {
+    console.log('Android times sync: ' + e);
+  }
+}
+  // ── Service Worker ─────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+
+  // ── Init ──────────────────────────────────────────────
+  loadState();
+  initTimePickers();
+  renderAll();
+
+  // ★ Initial sync of medicine data to native Android alarm system
+  syncToAndroid();
+  // ★ Initial sync of slot times to native Android alarm system
+try {
+  const savedTimes = localStorage.getItem('meditrack_slot_times');
+  if (savedTimes) syncTimesToAndroid(JSON.parse(savedTimes));
+} catch(e) {}
+
+  // Re-check week reset every minute
+  setInterval(() => {
+    checkWeekReset();
+    if (activeTab === 'today') renderToday();
+  }, 60000);
 </script>
 </body>
 </html>
