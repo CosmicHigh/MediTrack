@@ -1631,6 +1631,7 @@
     const numberInput = document.getElementById('durationValue');
     const indefinite = selectedDurationUnit === 'indefinite';
     numberInput.disabled = indefinite;
+    numberInput.max = selectedDurationUnit === 'years' ? '1000' : '9999';
     if (indefinite) numberInput.value = '';
     document.getElementById('durationHelper').textContent = indefinite
       ? 'This medicine continues until you change or remove it.'
@@ -1674,9 +1675,10 @@
 
     const rawDuration = Number(document.getElementById('durationValue').value);
     const durationValue = selectedDurationUnit === 'indefinite' ? null : rawDuration;
+    const durationLimit = selectedDurationUnit === 'years' ? 1000 : 9999;
     if (selectedDurationUnit !== 'indefinite' &&
-        (!Number.isInteger(durationValue) || durationValue < 1 || durationValue > 9999)) {
-      showToast('Enter a duration between 1 and 9999'); return;
+        (!Number.isInteger(durationValue) || durationValue < 1 || durationValue > durationLimit)) {
+      showToast(`Enter a duration between 1 and ${durationLimit}`); return;
     }
 
     const duplicateName = state.medicines.some(med =>

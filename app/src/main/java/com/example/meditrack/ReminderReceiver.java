@@ -19,70 +19,93 @@ public class ReminderReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String slotId = intent.getStringExtra("slot_id");
-        if (slotId == null) return;
+        String alarmTime = intent.getStringExtra("alarm_time");
+        String alarmKey = intent.getStringExtra("alarm_key");
+        String scheduledDate = intent.getStringExtra("scheduled_date");
 
-        Log.d(TAG, "Alarm fired for slot: " + slotId);
+        if (slotId == null || slotId.isEmpty()) {
+            Log.w(TAG, "Ignoring alarm without a slot");
+            return;
+        }
 
-        int calDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-        String todayKey = AlarmScheduler.calendarDayToKey(calDay);
+        Calendar dueDate = AlarmScheduler.calendarFromDateKey(scheduledDate);
+        if (dueDate == null) dueDate = Calendar.getInstance();
+
+        Log.d(TAG, "Alarm fired: " + alarmKey + " for "
+                + AlarmScheduler.calendarDateKey(dueDate));
 
         String json = AlarmScheduler.getMedicinesJson(context);
         ArrayList<String> medNames = new ArrayList<>();
         ArrayList<String> medFoods = new ArrayList<>();
 
         try {
-            JSONArray meds = new JSONArray(json);
-            for (int i = 0; i < meds.length(); i++) {
-                JSONObject med = meds.getJSONObject(i);
-                String name = med.getString("name");
-
-                JSONArray days = med.optJSONArray("days");
-                boolean scheduledToday = false;
-                if (days == null || days.length() == 0) {
-                    scheduledToday = true;
-                } else {
-                    for (int d = 0; d < days.length(); d++) {
-                        if (days.getString(d).equals(todayKey)) {
-                            scheduledToday = true;
-                            break;
-                        }
-                    }
+            JSONArray medicines = new JSONArray(json);
+            for (int i = 0; i < medicines.length(); i++) {
+                JSONObject medicine = medicines.optJSONObject(i);
+                if (medicine == null
+                        || !AlarmScheduler.isMedicineScheduledOnDate(medicine, dueDate)) {
+                    continue;
                 }
-                if (!scheduledToday) continue;
 
-                JSONArray doses = med.getJSONArray("doses");
+                JSONArray doses = medicine.optJSONArray("doses");
+                if (doses == null) continue;
+
+                String matchedFood = null;
                 for (int j = 0; j < doses.length(); j++) {
-                    JSONObject dose = doses.getJSONObject(j);
-                    if (dose.getString("time").equals(slotId)) {
-                        medNames.add(name);
-                        medFoods.add(dose.getString("food"));
+                    JSONObject dose = doses.optJSONObject(j);
+                    if (dose == null) continue;
+                    if (!slotId.equals(AlarmScheduler.getDoseSlot(dose))) continue;
+
+                    String effectiveTime =
+                            AlarmScheduler.getEffectiveDoseTime(context, dose);
+                    if (alarmTime == null || alarmTime.equals(effectiveTime)) {
+                        matchedFood = "after".equals(dose.optString("food"))
+                                ? "after"
+                                : "before";
                         break;
                     }
                 }
+
+                if (matchedFood != null) {
+                    String name = medicine.optString("name", "").trim();
+                    if (!name.isEmpty()) {
+                        medNames.add(name);
+                        medFoods.add(matchedFood);
+                    }
+                }
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error parsing medicines", e);
+        } catch (Exception error) {
+            Log.e(TAG, "Cannot resolve medicines due for " + alarmKey, error);
         }
 
         if (medNames.isEmpty()) {
-            Log.d(TAG, "No medicines due for slot " + slotId + " on " + todayKey);
+            Log.d(TAG, "No active medicines due for " + alarmKey);
             AlarmScheduler.scheduleAllAlarms(context);
             return;
         }
 
-        // Start the foreground service — this plays the sound immediately
         Intent serviceIntent = new Intent(context, ReminderService.class);
         serviceIntent.putExtra("slot_id", slotId);
+        serviceIntent.putExtra("alarm_time", alarmTime);
+        serviceIntent.putExtra("alarm_key", alarmKey);
+        serviceIntent.putExtra(
+                "scheduled_date",
+                AlarmScheduler.calendarDateKey(dueDate)
+        );
         serviceIntent.putStringArrayListExtra("med_names", medNames);
         serviceIntent.putStringArrayListExtra("med_foods", medFoods);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent);
-        } else {
-            context.startService(serviceIntent);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent);
+            } else {
+                context.startService(serviceIntent);
+            }
+        } catch (RuntimeException error) {
+            Log.e(TAG, "Could not start reminder service for " + alarmKey, error);
+        } finally {
+            // AlarmManager entries are one-shot. Build the next eligible occurrence now.
+            AlarmScheduler.scheduleAllAlarms(context);
         }
-
-        // Reschedule for next day
-        AlarmScheduler.scheduleAllAlarms(context);
     }
 }
