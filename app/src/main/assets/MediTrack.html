@@ -185,6 +185,7 @@
     .med-tag { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
     .tag-before { background: #FEF3C7; color: #92400E; }
     .tag-after  { background: #D1FAE5; color: #065F46; }
+    .tag-time   { background: var(--teal-pale); color: var(--teal); }
 
     /* ── No medicines ── */
     .no-medicines { text-align: center; padding: 40px 20px; color: var(--muted); }
@@ -233,6 +234,52 @@
     .time-pill[data-time="evening"].selected   { background: var(--evening); }
     .time-pill[data-time="night"].selected     { background: var(--night); }
 
+    /* Per-medicine dose times */
+    .dose-time-editors { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+    .slot-time-editor {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 16px; padding: 14px;
+    }
+    .slot-time-editor-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 10px;
+    }
+    .slot-time-editor-title { font-size: 16px; font-weight: 800; color: var(--text); }
+    .slot-time-editor-sub { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 2px; }
+    .dose-time-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg); border-radius: 13px; padding: 10px 10px 10px 12px;
+      margin-top: 8px; min-height: 62px;
+    }
+    .dose-time-copy { flex: 1; min-width: 0; }
+    .dose-time-mode { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+    .dose-time-value { font-size: 17px; font-weight: 800; color: var(--text); margin-top: 2px; }
+    .dose-time-input {
+      width: 126px; border: 2px solid var(--border); border-radius: 11px;
+      padding: 10px 8px; background: var(--surface); color: var(--text);
+      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+      outline: none;
+    }
+    .dose-time-input:focus { border-color: var(--teal); }
+    .dose-time-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .btn-time-small {
+      min-height: 42px; border: none; border-radius: 11px; padding: 0 12px;
+      background: var(--teal-pale); color: var(--teal);
+      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-time-remove {
+      width: 42px; min-width: 42px; padding: 0;
+      background: var(--coral-lt); color: var(--coral); font-size: 18px;
+    }
+    .btn-add-time {
+      width: 100%; border: 2px dashed var(--border); border-radius: 12px;
+      padding: 11px; margin-top: 10px; background: transparent;
+      color: var(--teal); font-family: 'Nunito', sans-serif;
+      font-size: 14px; font-weight: 800; cursor: pointer;
+    }
+    .field-helper { font-size: 12px; line-height: 1.45; font-weight: 650; color: var(--muted); margin-top: 8px; }
+
     /* Day picker */
     .day-picker-row { display: flex; gap: 6px; justify-content: space-between; margin-bottom: 10px; }
     .day-circle {
@@ -251,6 +298,57 @@
       color: var(--muted); cursor: pointer; transition: all 0.18s;
     }
     .all-days-btn.selected { background: var(--teal-pale); border-color: var(--teal); color: var(--teal); }
+
+    /* Course start and duration */
+    .start-mode-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .start-mode-btn {
+      min-height: 50px; border: 2.5px solid var(--border); border-radius: 14px;
+      background: var(--surface); color: var(--muted);
+      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800;
+      cursor: pointer;
+    }
+    .start-mode-btn.selected { border-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
+    .start-date-wrap { display: none; margin-top: 10px; }
+    .start-date-wrap.show { display: block; }
+    .start-date-input {
+      width: 100%; min-height: 52px; border: 2px solid var(--border); border-radius: 14px;
+      padding: 10px 14px; background: var(--surface); color: var(--text);
+      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 750;
+      outline: none;
+    }
+    .start-date-input:focus { border-color: var(--teal); }
+    .duration-row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 10px; }
+    .duration-select { position: relative; }
+    .duration-select-trigger {
+      width: 100%; min-height: 52px; border: 2px solid var(--border); border-radius: 14px;
+      padding: 0 14px; background: var(--surface); color: var(--text);
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+      cursor: pointer;
+    }
+    .duration-select-trigger.open { border-color: var(--teal); }
+    .duration-chevron { color: var(--muted); transition: transform 0.18s; }
+    .duration-select-trigger.open .duration-chevron { transform: rotate(180deg); }
+    .duration-menu {
+      display: none; position: absolute; left: 0; right: 0; top: calc(100% + 6px);
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px;
+      padding: 6px; box-shadow: 0 12px 30px rgba(0,0,0,0.16); z-index: 500;
+    }
+    .duration-menu.open { display: block; }
+    .duration-option {
+      width: 100%; min-height: 44px; border: none; border-radius: 10px;
+      background: transparent; color: var(--text); text-align: left; padding: 0 12px;
+      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 750; cursor: pointer;
+    }
+    .duration-option.selected { background: var(--teal-pale); color: var(--teal); }
+    .duration-number {
+      width: 100%; min-height: 52px; border: 2px solid var(--border); border-radius: 14px;
+      padding: 0 14px; background: var(--surface); color: var(--text);
+      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
+      outline: none;
+    }
+    .duration-number:focus { border-color: var(--teal); }
+    .duration-number:disabled { opacity: 0.48; background: var(--bg); }
 
     /* Food options */
     .food-option {
@@ -287,6 +385,7 @@
 
     .med-plan-card { background: var(--surface); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
     .med-plan-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
+    .med-plan-badges { display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
     .med-plan-name-row { display: flex; align-items: center; gap: 8px; }
     .med-dot { width: 10px; height: 10px; background: var(--teal); border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
     .med-plan-name { font-size: 19px; font-weight: 800; color: var(--text); }
@@ -299,6 +398,12 @@
     .meta-item { display: flex; flex-direction: column; gap: 2px; }
     .meta-label { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
     .meta-value { font-size: 14px; font-weight: 700; color: var(--text); }
+    .course-status { font-size: 11px; font-weight: 850; padding: 4px 9px; border-radius: 20px; white-space: nowrap; }
+    .status-active { color: #065F46; background: #D1FAE5; }
+    .status-upcoming { color: #075985; background: #E0F2FE; }
+    .status-completed { color: #7C2D12; background: #FFEDD5; }
+    .course-summary { display: flex; flex-wrap: wrap; gap: 5px 10px; }
+    .course-summary .meta-value { line-height: 1.45; }
     .time-chips { display: flex; flex-wrap: wrap; gap: 5px; }
     .time-chip { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
     .chip-morning   { background: var(--morning-bg);   color: var(--morning); }
@@ -413,6 +518,13 @@
       gap: 8px;
       line-height: 1.5;
     }
+
+    @media (max-width: 380px) {
+      .dose-time-row { align-items: flex-start; flex-wrap: wrap; }
+      .dose-time-copy { flex-basis: calc(100% - 52px); }
+      .dose-time-actions { margin-left: auto; }
+      .duration-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -491,6 +603,8 @@
         <button class="time-pill" data-time="evening"   onclick="toggleTime(this)">🌆 বিকাল</button>
         <button class="time-pill" data-time="night"     onclick="toggleTime(this)">🌙 রাত</button>
       </div>
+      <div class="dose-time-editors" id="doseTimeEditors"></div>
+      <p class="field-helper">Each selected slot begins at its Settings time. Change it here only when this medicine needs a different time.</p>
     </div>
 
     <div class="form-section">
@@ -505,6 +619,40 @@
         <button class="day-circle selected" data-day="sun" onclick="toggleDay(this)">S</button>
       </div>
       <button class="all-days-btn selected" id="allDaysBtn" onclick="selectAllDays()">✓ All Days of the Week</button>
+    </div>
+
+    <div class="form-section">
+      <span class="form-section-label">Start</span>
+      <div class="start-mode-group">
+        <button type="button" class="start-mode-btn selected" id="startTodayBtn" onclick="selectStartMode('today')">Start Today</button>
+        <button type="button" class="start-mode-btn" id="selectStartDateBtn" onclick="selectStartMode('date')">Select Start Date</button>
+      </div>
+      <div class="start-date-wrap" id="startDateWrap">
+        <input class="start-date-input" type="date" id="medicineStartDate" aria-label="Medicine start date" />
+      </div>
+    </div>
+
+    <div class="form-section">
+      <span class="form-section-label">Duration</span>
+      <div class="duration-row">
+        <div class="duration-select" id="durationSelect">
+          <button type="button" class="duration-select-trigger" id="durationTrigger"
+            aria-haspopup="listbox" aria-expanded="false" onclick="toggleDurationMenu(event)">
+            <span id="durationUnitLabel">Indefinite</span>
+            <span class="duration-chevron">⌄</span>
+          </button>
+          <div class="duration-menu" id="durationMenu" role="listbox">
+            <button type="button" class="duration-option" data-duration-unit="days" onclick="selectDurationUnit('days')">Days</button>
+            <button type="button" class="duration-option" data-duration-unit="weeks" onclick="selectDurationUnit('weeks')">Weeks</button>
+            <button type="button" class="duration-option" data-duration-unit="months" onclick="selectDurationUnit('months')">Months</button>
+            <button type="button" class="duration-option" data-duration-unit="years" onclick="selectDurationUnit('years')">Years</button>
+            <button type="button" class="duration-option selected" data-duration-unit="indefinite" onclick="selectDurationUnit('indefinite')">Indefinite</button>
+          </div>
+        </div>
+        <input class="duration-number" type="number" id="durationValue" inputmode="numeric"
+          min="1" step="1" placeholder="Number" aria-label="Duration amount" disabled />
+      </div>
+      <p class="field-helper" id="durationHelper">This medicine continues until you change or remove it.</p>
     </div>
 
     <div class="form-section">
@@ -526,7 +674,7 @@
 
   <!-- ── MEDS VIEW ── -->
   <div class="view" id="view-meds">
-    <div class="week-reset-info">🔄 Medicines repeat every week automatically.</div>
+    <div class="week-reset-info">📅 Medicines follow their selected days and treatment duration.</div>
     <div class="meds-header">
       <h2>Your Medicines</h2>
       <span class="meds-count" id="medsCount"></span>
@@ -632,10 +780,10 @@
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   const SLOTS = [
-    { id: 'morning',   label: 'সকাল',  icon: '🌅', cls: 'slot-morning' },
-    { id: 'afternoon', label: 'দুপুর', icon: '☀️',  cls: 'slot-afternoon' },
-    { id: 'evening',   label: 'বিকাল', icon: '🌆', cls: 'slot-evening' },
-    { id: 'night',     label: 'রাত',   icon: '🌙', cls: 'slot-night' },
+    { id: 'morning',   label: 'সকাল',  name: 'Morning',   icon: '🌅', cls: 'slot-morning' },
+    { id: 'afternoon', label: 'দুপুর', name: 'Afternoon', icon: '☀️', cls: 'slot-afternoon' },
+    { id: 'evening',   label: 'বিকাল', name: 'Evening',   icon: '🌆', cls: 'slot-evening' },
+    { id: 'night',     label: 'রাত',   name: 'Night',     icon: '🌙', cls: 'slot-night' },
   ];
 
   const DAY_ORDER = ['mon','tue','wed','thu','fri','sat','sun'];
@@ -666,7 +814,69 @@
     return JS_TO_DAY[date.getDay()];
   }
 
-  function isMedScheduledForDay(med, dayKey) {
+  function isValidDateKey(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
+    const d = parseDateKey(value);
+    return !Number.isNaN(d.getTime()) && dateKey(d) === value;
+  }
+
+  function parseDateKey(value) {
+    const [y,m,d] = String(value || '').split('-').map(Number);
+    return new Date(y, m - 1, d, 12, 0, 0, 0);
+  }
+
+  function addDaysKey(start, days) {
+    const d = parseDateKey(start);
+    d.setDate(d.getDate() + days);
+    return dateKey(d);
+  }
+
+  function addMonthsKey(start, months) {
+    const d = parseDateKey(start);
+    const originalDay = d.getDate();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + months);
+    const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    d.setDate(Math.min(originalDay, lastDay));
+    return dateKey(d);
+  }
+
+  function addYearsKey(start, years) {
+    const d = parseDateKey(start);
+    const month = d.getMonth();
+    const day = d.getDate();
+    d.setDate(1);
+    d.setFullYear(d.getFullYear() + years);
+    d.setMonth(month);
+    const lastDay = new Date(d.getFullYear(), month + 1, 0).getDate();
+    d.setDate(Math.min(day, lastDay));
+    return dateKey(d);
+  }
+
+  function calculateEndDate(startDate, unit, value) {
+    if (unit === 'indefinite') return null;
+    const amount = Number(value);
+    if (!isValidDateKey(startDate) || !Number.isInteger(amount) || amount < 1) return null;
+    if (unit === 'days')   return addDaysKey(startDate, amount - 1);
+    if (unit === 'weeks')  return addDaysKey(startDate, amount * 7 - 1);
+    if (unit === 'months') return addDaysKey(addMonthsKey(startDate, amount), -1);
+    if (unit === 'years')  return addDaysKey(addYearsKey(startDate, amount), -1);
+    return null;
+  }
+
+  function isMedWithinCourse(med, dayStr) {
+    if (!isValidDateKey(dayStr)) return false;
+    if (isValidDateKey(med.startDate) && dayStr < med.startDate) return false;
+    const endDate = med.endDate || calculateEndDate(
+      med.startDate, med.durationUnit, med.durationValue
+    );
+    if (isValidDateKey(endDate) && dayStr > endDate) return false;
+    return true;
+  }
+
+  function isMedScheduledForDate(med, dayStr) {
+    if (!isMedWithinCourse(med, dayStr)) return false;
+    const dayKey = getDayKeyFromStr(dayStr);
     if (!med.days || med.days.length === 0) return true;
     return med.days.includes(dayKey);
   }
@@ -676,16 +886,83 @@
     return DAY_ORDER.filter(d => days.includes(d)).map(d => DAY_ABBR[d]).join(', ');
   }
 
-  function getNextSlotLabel(todayStr, checkKeys, dayKey) {
-    for (const slot of SLOTS) {
-      const meds = state.medicines.filter(m =>
-        m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
-      );
-      if (meds.some(m => !checkKeys[m.id + '_' + slot.id])) {
-        return slot.icon + ' ' + slot.label;
+  function formatDateHuman(value) {
+    if (!isValidDateKey(value)) return 'Not set';
+    const d = parseDateKey(value);
+    return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  }
+
+  function formatDuration(med) {
+    if (!med.durationUnit || med.durationUnit === 'indefinite') return 'Indefinite';
+    const amount = Number(med.durationValue);
+    const unit = amount === 1
+      ? med.durationUnit.replace(/s$/, '')
+      : med.durationUnit;
+    return `${amount} ${unit}`;
+  }
+
+  function getCourseStatus(med, referenceDate = todayKey()) {
+    if (isValidDateKey(med.startDate) && referenceDate < med.startDate) return 'upcoming';
+    if (isValidDateKey(med.endDate) && referenceDate > med.endDate) return 'completed';
+    return 'active';
+  }
+
+  function readSlotTimes() {
+    let times = { ...DEFAULT_TIMES };
+    try {
+      const saved = localStorage.getItem('meditrack_slot_times');
+      if (saved) times = { ...DEFAULT_TIMES, ...JSON.parse(saved) };
+    } catch(e) {}
+    Object.keys(DEFAULT_TIMES).forEach(slot => {
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(times[slot] || '')) {
+        times[slot] = DEFAULT_TIMES[slot];
       }
-    }
-    return '';
+    });
+    return times;
+  }
+
+  function getDoseSlot(dose) {
+    return dose.slot || dose.time;
+  }
+
+  function getEffectiveDoseTime(dose, times = readSlotTimes()) {
+    const slot = getDoseSlot(dose);
+    if (dose.useDefaultTime !== false) return times[slot] || DEFAULT_TIMES[slot] || '08:00';
+    return /^\d{2}:\d{2}$/.test(dose.customTime || '')
+      ? dose.customTime
+      : (times[slot] || DEFAULT_TIMES[slot] || '08:00');
+  }
+
+  function formatClockTime(time24) {
+    const [rawHour, rawMinute] = String(time24 || '00:00').split(':').map(Number);
+    const hour = rawHour % 12 || 12;
+    return `${hour}:${String(rawMinute || 0).padStart(2,'0')} ${rawHour >= 12 ? 'PM' : 'AM'}`;
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, char => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
+    })[char]);
+  }
+
+  function getDoseCheckKey(med, dose) {
+    return med.id + '_' + dose.id;
+  }
+
+  function getNextSlotLabel(todayStr, checkKeys) {
+    const times = readSlotTimes();
+    const due = [];
+    state.medicines.forEach(med => {
+      if (!isMedScheduledForDate(med, todayStr)) return;
+      (med.doses || []).forEach(dose => {
+        const slot = SLOTS.find(s => s.id === getDoseSlot(dose));
+        if (!slot || checkKeys[getDoseCheckKey(med, dose)]) return;
+        due.push({ slot, time: getEffectiveDoseTime(dose, times) });
+      });
+    });
+    due.sort((a,b) => a.time.localeCompare(b.time));
+    if (!due.length) return '';
+    return `${due[0].slot.icon} ${due[0].slot.label} · ${formatClockTime(due[0].time)}`;
   }
 
   // ── Android Native Bridge ──────────────────────────────
@@ -703,21 +980,89 @@
 
   // ── State ──────────────────────────────────────────────
   let state = {
+    schemaVersion: 2,
     medicines: [],
     weekStart: null,
     checks:    {}
   };
 
+  function normalizeMedicine(med) {
+    const fallbackStart = isValidDateKey(state.weekStart) ? state.weekStart : todayKey();
+    const allowedUnits = ['days','weeks','months','years','indefinite'];
+    const durationUnit = allowedUnits.includes(med.durationUnit)
+      ? med.durationUnit
+      : 'indefinite';
+    const parsedDuration = Number(med.durationValue);
+    const durationValue = durationUnit === 'indefinite'
+      ? null
+      : (Number.isInteger(parsedDuration) && parsedDuration > 0 ? parsedDuration : 1);
+    const startDate = isValidDateKey(med.startDate) ? med.startDate : fallbackStart;
+    const seenDoseIds = new Set();
+
+    const doses = (Array.isArray(med.doses) ? med.doses : []).map((dose, index) => {
+      const slot = getDoseSlot(dose);
+      if (!SLOTS.some(s => s.id === slot)) return null;
+
+      let doseId = String(dose.id || slot);
+      if (seenDoseIds.has(doseId)) doseId = `${slot}_${index + 1}`;
+      while (seenDoseIds.has(doseId)) doseId += '_x';
+      seenDoseIds.add(doseId);
+
+      const hasCustomTime = /^\d{2}:\d{2}$/.test(dose.customTime || '');
+      const useDefaultTime = typeof dose.useDefaultTime === 'boolean'
+        ? (dose.useDefaultTime || !hasCustomTime)
+        : !hasCustomTime;
+
+      return {
+        ...dose,
+        id: doseId,
+        time: slot,
+        slot,
+        useDefaultTime,
+        customTime: useDefaultTime ? null : dose.customTime,
+        food: dose.food === 'after' ? 'after' : 'before'
+      };
+    }).filter(Boolean);
+
+    const selectedDays = Array.isArray(med.days)
+      ? DAY_ORDER.filter(day => med.days.includes(day))
+      : [...DAY_ORDER];
+
+    return {
+      ...med,
+      id: med.id || uuid(),
+      name: String(med.name || '').trim(),
+      doses,
+      days: selectedDays.length ? selectedDays : [...DAY_ORDER],
+      startDate,
+      durationUnit,
+      durationValue,
+      endDate: calculateEndDate(startDate, durationUnit, durationValue)
+    };
+  }
+
   function loadState() {
+    let requiresMigration = false;
     try {
       const s = localStorage.getItem('meditrack_state');
       if (s) state = JSON.parse(s);
-      state.medicines = state.medicines.map(m => ({
-        ...m,
-        days: m.days || [...DAY_ORDER]
-      }));
-    } catch(e) {}
+      if (!state || typeof state !== 'object') throw new Error('Invalid saved state');
+      if (!Array.isArray(state.medicines)) state.medicines = [];
+      if (!state.checks || typeof state.checks !== 'object') state.checks = {};
+
+      const previousSchemaVersion = state.schemaVersion;
+      const before = JSON.stringify(state.medicines);
+      state.medicines = state.medicines.map(normalizeMedicine);
+      state.schemaVersion = 2;
+      requiresMigration = previousSchemaVersion !== 2 || before !== JSON.stringify(state.medicines);
+    } catch(e) {
+      state = { schemaVersion: 2, medicines: [], weekStart: null, checks: {} };
+      requiresMigration = true;
+    }
     checkWeekReset();
+    if (requiresMigration && state.weekStart === dateKey(getMondayOf(new Date()))) {
+      saveState();
+    }
   }
 
   function saveState() {
@@ -772,51 +1117,61 @@
 
   // ── Build Slots HTML ───────────────────────────────────
   function buildSlotsHTML(dayStr, interactive) {
-    const dayKey = getDayKeyFromStr(dayStr);
     let html = '';
     let totalDoses = 0, doneDoses = 0;
+    const slotTimes = readSlotTimes();
+    const checkKeys = state.checks[dayStr] || {};
 
     for (const slot of SLOTS) {
-      const meds = state.medicines.filter(m =>
-        m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
-      );
-      if (meds.length === 0) continue;
-
-      const checkKeys = state.checks[dayStr] || {};
-      let checkedCount = 0;
-      meds.forEach(m => {
-        if (checkKeys[m.id + '_' + slot.id]) { checkedCount++; doneDoses++; }
-        totalDoses++;
+      const entries = [];
+      state.medicines.forEach(med => {
+        if (!isMedScheduledForDate(med, dayStr)) return;
+        (med.doses || []).forEach(dose => {
+          if (getDoseSlot(dose) === slot.id) {
+            entries.push({ med, dose, effectiveTime: getEffectiveDoseTime(dose, slotTimes) });
+          }
+        });
       });
+      if (entries.length === 0) continue;
+
+      entries.sort((a,b) =>
+        a.effectiveTime.localeCompare(b.effectiveTime) || a.med.name.localeCompare(b.med.name)
+      );
+
+      const checkedCount = entries.filter(({med,dose}) =>
+        checkKeys[getDoseCheckKey(med, dose)]
+      ).length;
+      doneDoses += checkedCount;
+      totalDoses += entries.length;
 
       html += `<div class="slot-section" data-slot="${slot.id}">
         <div class="slot-header ${slot.cls}">
           <div class="slot-icon">${slot.icon}</div>
           <div class="slot-title">${slot.label}</div>
-          <div class="slot-count">${checkedCount}/${meds.length}</div>
+          <div class="slot-count">${checkedCount}/${entries.length}</div>
         </div>`;
 
-      for (const med of meds) {
-        const key     = med.id + '_' + slot.id;
+      for (const { med, dose, effectiveTime } of entries) {
+        const key     = getDoseCheckKey(med, dose);
         const checked = !!(checkKeys[key]);
-        const dose    = med.doses.find(d => d.time === slot.id);
         const foodTag = dose
           ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
           : '';
+        const timeTag = `<span class="med-tag tag-time">⏰ ${formatClockTime(effectiveTime)}${dose.useDefaultTime !== false ? ' · Default' : ''}</span>`;
 
         if (interactive) {
           html += `<div class="med-card ${checked ? 'checked' : ''}" id="card-${dayStr}-${key}">
             <div class="med-checkbox ${checked ? 'checked' : ''}" onclick="toggleCheck('${dayStr}','${key}')"></div>
             <div class="med-info">
-              <div class="med-name">${med.name}</div>
-              <div class="med-tags">${foodTag}</div>
+              <div class="med-name">${escapeHTML(med.name)}</div>
+              <div class="med-tags">${timeTag}${foodTag}</div>
             </div>
           </div>`;
         } else {
           html += `<div class="med-card ${checked ? 'checked' : ''}">
             <div class="med-info">
-              <div class="med-name">${med.name}</div>
-              <div class="med-tags">${foodTag}</div>
+              <div class="med-name">${escapeHTML(med.name)}</div>
+              <div class="med-tags">${timeTag}${foodTag}</div>
             </div>
           </div>`;
         }
@@ -827,7 +1182,7 @@
     if (!html) {
       html = `<div class="no-medicines">
         <div class="big-icon">💊</div>
-        <p>No medicines scheduled for today.<br>Go to <strong>Add</strong> tab to add some.</p>
+        <p>No medicines scheduled for this day.<br>Go to <strong>Add</strong> tab to add some.</p>
       </div>`;
     }
 
@@ -837,7 +1192,6 @@
   // ── Render Today ───────────────────────────────────────
   function renderToday() {
     const today  = todayKey();
-    const dayKey = getDayKeyFromStr(today);
     const { html, totalDoses, doneDoses } = buildSlotsHTML(today, true);
 
     document.getElementById('todaySlots').innerHTML = html;
@@ -848,6 +1202,7 @@
     if (totalDoses === 0) {
       card.style.display = 'none';
       allClear.classList.remove('show');
+      document.getElementById('todaySlots').style.display = 'block';
       return;
     }
 
@@ -861,7 +1216,7 @@
     document.getElementById('pcMain').textContent =
       left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
     document.getElementById('pcSub').textContent =
-      left > 0 ? 'Next: ' + (getNextSlotLabel(today, checkKeys, dayKey) || '') : '';
+      left > 0 ? 'Next: ' + (getNextSlotLabel(today, checkKeys) || '') : '';
     document.getElementById('pcBarFill').style.width = pct + '%';
     document.getElementById('pcCompleted').textContent =
       doneDoses + ' OF ' + totalDoses + ' COMPLETED';
@@ -888,34 +1243,34 @@
 
   // ── Update Slot Counter ────
   function updateSlotCounter(dayStr, slotId) {
-    const dayKey    = getDayKeyFromStr(dayStr);
     const checkKeys = state.checks[dayStr] || {};
-    const meds      = state.medicines.filter(m =>
-      m.doses.some(d => d.time === slotId) && isMedScheduledForDay(m, dayKey)
-    );
-    const done = meds.filter(m => checkKeys[m.id + '_' + slotId]).length;
+    const entries = [];
+    state.medicines.forEach(med => {
+      if (!isMedScheduledForDate(med, dayStr)) return;
+      (med.doses || []).forEach(dose => {
+        if (getDoseSlot(dose) === slotId) entries.push({med, dose});
+      });
+    });
+    const done = entries.filter(({med,dose}) => checkKeys[getDoseCheckKey(med,dose)]).length;
     const sec = document.querySelector(`#todaySlots .slot-section[data-slot="${slotId}"]`);
     if (sec) {
       const counter = sec.querySelector('.slot-count');
-      if (counter) counter.textContent = done + '/' + meds.length;
+      if (counter) counter.textContent = done + '/' + entries.length;
     }
   }
 
   // ── Update Progress Card ───────────────────────────────
   function updateProgressCard(dayStr) {
-    const dayKey    = getDayKeyFromStr(dayStr);
     const checkKeys = state.checks[dayStr] || {};
     let totalDoses = 0, doneDoses = 0;
 
-    for (const slot of SLOTS) {
-      const meds = state.medicines.filter(m =>
-        m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
-      );
-      meds.forEach(m => {
+    state.medicines.forEach(med => {
+      if (!isMedScheduledForDate(med, dayStr)) return;
+      (med.doses || []).forEach(dose => {
         totalDoses++;
-        if (checkKeys[m.id + '_' + slot.id]) doneDoses++;
+        if (checkKeys[getDoseCheckKey(med,dose)]) doneDoses++;
       });
-    }
+    });
     if (totalDoses === 0) return;
 
     const left = totalDoses - doneDoses;
@@ -924,7 +1279,7 @@
     document.getElementById('pcMain').textContent =
       left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
     document.getElementById('pcSub').textContent =
-      left > 0 ? 'Next: ' + (getNextSlotLabel(dayStr, checkKeys, dayKey) || '') : '';
+      left > 0 ? 'Next: ' + (getNextSlotLabel(dayStr, checkKeys) || '') : '';
     document.getElementById('pcBarFill').style.width = pct + '%';
     document.getElementById('pcCompleted').textContent =
       doneDoses + ' OF ' + totalDoses + ' COMPLETED';
@@ -951,27 +1306,33 @@
 
   function buildAllClearBody() {
     const today    = todayKey();
-    const dayKey   = getDayKeyFromStr(today);
-    const checkKeys = state.checks[today] || {};
+    const slotTimes = readSlotTimes();
     let html = '';
 
     for (const slot of SLOTS) {
-      const meds = state.medicines.filter(m =>
-        m.doses.some(d => d.time === slot.id) && isMedScheduledForDay(m, dayKey)
-      );
-      if (meds.length === 0) continue;
+      const entries = [];
+      state.medicines.forEach(med => {
+        if (!isMedScheduledForDate(med, today)) return;
+        (med.doses || []).forEach(dose => {
+          if (getDoseSlot(dose) === slot.id) {
+            entries.push({ med, dose, effectiveTime: getEffectiveDoseTime(dose, slotTimes) });
+          }
+        });
+      });
+      if (entries.length === 0) continue;
+      entries.sort((a,b) => a.effectiveTime.localeCompare(b.effectiveTime));
       html += `<div class="slot-title-ac">${slot.icon} ${slot.label}</div>`;
-      for (const med of meds) {
-        const key  = med.id + '_' + slot.id;
-        const dose = med.doses.find(d => d.time === slot.id);
+      for (const {med, dose, effectiveTime} of entries) {
+        const key  = getDoseCheckKey(med,dose);
         const foodTag = dose
           ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
           : '';
+        const timeTag = `<span class="med-tag tag-time">⏰ ${formatClockTime(effectiveTime)}${dose.useDefaultTime !== false ? ' · Default' : ''}</span>`;
         html += `<div class="med-card checked" id="card-${today}-${key}">
           <div class="med-checkbox checked" onclick="toggleCheck('${today}','${key}')"></div>
           <div class="med-info">
-            <div class="med-name">${med.name}</div>
-            <div class="med-tags">${foodTag}</div>
+            <div class="med-name">${escapeHTML(med.name)}</div>
+            <div class="med-tags">${timeTag}${foodTag}</div>
           </div>
         </div>`;
       }
@@ -1015,6 +1376,7 @@
   // ── Meds View ──────────────────────────────────────────
   function renderMeds() {
     const list = document.getElementById('medicineList');
+    const slotTimes = readSlotTimes();
     document.getElementById('medsCount').textContent =
       state.medicines.length + ' Total';
 
@@ -1031,21 +1393,34 @@
       const badgeCls = food === 'before' ? 'badge-before' : 'badge-after';
       const badgeTxt = food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে';
 
-      const timeChips = med.doses.map(d =>
-        `<span class="time-chip chip-${d.time}">${SLOTS.find(s=>s.id===d.time)?.icon} ${SLOTS.find(s=>s.id===d.time)?.label}</span>`
-      ).join('');
+      const timeChips = [...(med.doses || [])]
+        .sort((a,b) => getEffectiveDoseTime(a,slotTimes).localeCompare(getEffectiveDoseTime(b,slotTimes)))
+        .map(d => {
+          const slotId = getDoseSlot(d);
+          const slot = SLOTS.find(s => s.id === slotId);
+          const mode = d.useDefaultTime !== false ? ' · Default' : '';
+          return `<span class="time-chip chip-${slotId}">${slot?.icon || '⏰'} ${slot?.name || slotId} · ${formatClockTime(getEffectiveDoseTime(d,slotTimes))}${mode}</span>`;
+        }).join('');
 
       const daysText = formatDays(med.days);
+      const status = getCourseStatus(med);
+      const statusText = status === 'upcoming' ? 'Upcoming' : status === 'completed' ? 'Completed' : 'Active';
+      const courseEnd = med.durationUnit === 'indefinite'
+        ? 'No end date'
+        : `Ends ${formatDateHuman(med.endDate)}`;
 
       return `<div class="med-plan-card">
         <div class="med-plan-top">
           <div>
             <div class="med-plan-name-row">
               <span class="med-dot"></span>
-              <span class="med-plan-name">${med.name}</span>
+              <span class="med-plan-name">${escapeHTML(med.name)}</span>
             </div>
           </div>
-          <span class="food-badge ${badgeCls}">${badgeTxt}</span>
+          <div class="med-plan-badges">
+            <span class="course-status status-${status}">${statusText}</span>
+            <span class="food-badge ${badgeCls}">${badgeTxt}</span>
+          </div>
         </div>
         <div class="med-plan-meta">
           <div class="meta-row">
@@ -1060,6 +1435,15 @@
               <span class="meta-value">${daysText}</span>
             </div>
           </div>
+          <div class="meta-row">
+            <div class="meta-item">
+              <span class="meta-label">Course</span>
+              <div class="course-summary">
+                <span class="meta-value">Starts ${formatDateHuman(med.startDate)}</span>
+                <span class="meta-value">${formatDuration(med)} · ${courseEnd}</span>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="med-plan-actions">
           <button class="btn-edit" onclick="editMedicine('${med.id}')">✏️ Edit</button>
@@ -1070,15 +1454,118 @@
   }
 
   // ── Add / Edit Form Logic ──────────────────────────────
-  let selectedTimes = new Set();
-  let selectedFood  = null;
-  let selectedDays  = new Set(DAY_ORDER);
-  let editingMedId  = null;
+  let doseDrafts            = [];
+  let selectedFood          = null;
+  let selectedDays          = new Set(DAY_ORDER);
+  let editingMedId          = null;
+  let selectedStartMode     = 'today';
+  let selectedDurationUnit  = 'indefinite';
 
   function toggleTime(btn) {
-    const t = btn.dataset.time;
-    selectedTimes.has(t) ? selectedTimes.delete(t) : selectedTimes.add(t);
-    btn.classList.toggle('selected', selectedTimes.has(t));
+    const slot = btn.dataset.time;
+    const alreadySelected = doseDrafts.some(dose => dose.slot === slot);
+    if (alreadySelected) {
+      doseDrafts = doseDrafts.filter(dose => dose.slot !== slot);
+    } else {
+      doseDrafts.push({
+        id: uuid(), slot, useDefaultTime: true, customTime: null
+      });
+    }
+    syncTimePills();
+    renderDoseTimeEditors();
+  }
+
+  function syncTimePills() {
+    document.querySelectorAll('[data-time]').forEach(btn => {
+      btn.classList.toggle('selected', doseDrafts.some(dose => dose.slot === btn.dataset.time));
+    });
+  }
+
+  function renderDoseTimeEditors() {
+    const container = document.getElementById('doseTimeEditors');
+    const slotTimes = readSlotTimes();
+    let html = '';
+
+    SLOTS.forEach(slot => {
+      const doses = doseDrafts.filter(dose => dose.slot === slot.id);
+      if (!doses.length) return;
+
+      html += `<div class="slot-time-editor">
+        <div class="slot-time-editor-header">
+          <div>
+            <div class="slot-time-editor-title">${slot.icon} ${slot.label} · ${slot.name}</div>
+            <div class="slot-time-editor-sub">${doses.length} ${doses.length === 1 ? 'time' : 'times'} selected</div>
+          </div>
+        </div>`;
+
+      doses.forEach(dose => {
+        if (dose.useDefaultTime !== false) {
+          html += `<div class="dose-time-row">
+            <div class="dose-time-copy">
+              <div class="dose-time-mode">Uses Settings default</div>
+              <div class="dose-time-value">${formatClockTime(slotTimes[slot.id])}</div>
+            </div>
+            <div class="dose-time-actions">
+              <button type="button" class="btn-time-small" onclick="makeDoseCustom('${dose.id}')">Change</button>
+              <button type="button" class="btn-time-small btn-time-remove" aria-label="Remove time" onclick="removeDoseTime('${dose.id}')">×</button>
+            </div>
+          </div>`;
+        } else {
+          html += `<div class="dose-time-row">
+            <div class="dose-time-copy">
+              <div class="dose-time-mode">Custom time</div>
+              <input class="dose-time-input" type="time" value="${escapeHTML(dose.customTime || slotTimes[slot.id])}"
+                aria-label="Custom ${slot.name} time" onchange="updateDoseCustomTime('${dose.id}', this.value)" />
+            </div>
+            <div class="dose-time-actions">
+              <button type="button" class="btn-time-small" onclick="useDefaultDoseTime('${dose.id}')">Use default</button>
+              <button type="button" class="btn-time-small btn-time-remove" aria-label="Remove time" onclick="removeDoseTime('${dose.id}')">×</button>
+            </div>
+          </div>`;
+        }
+      });
+
+      html += `<button type="button" class="btn-add-time" onclick="addDoseTime('${slot.id}')">＋ Add another ${slot.name} time</button></div>`;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function addDoseTime(slot) {
+    const defaultTime = readSlotTimes()[slot] || DEFAULT_TIMES[slot];
+    doseDrafts.push({
+      id: uuid(), slot, useDefaultTime: false, customTime: defaultTime
+    });
+    syncTimePills();
+    renderDoseTimeEditors();
+  }
+
+  function removeDoseTime(id) {
+    doseDrafts = doseDrafts.filter(dose => dose.id !== id);
+    syncTimePills();
+    renderDoseTimeEditors();
+  }
+
+  function makeDoseCustom(id) {
+    const dose = doseDrafts.find(item => item.id === id);
+    if (!dose) return;
+    dose.customTime = getEffectiveDoseTime(dose);
+    dose.useDefaultTime = false;
+    renderDoseTimeEditors();
+  }
+
+  function useDefaultDoseTime(id) {
+    const dose = doseDrafts.find(item => item.id === id);
+    if (!dose) return;
+    dose.useDefaultTime = true;
+    dose.customTime = null;
+    renderDoseTimeEditors();
+  }
+
+  function updateDoseCustomTime(id, value) {
+    const dose = doseDrafts.find(item => item.id === id);
+    if (!dose) return;
+    dose.customTime = value;
   }
 
   function toggleDay(btn) {
@@ -1105,27 +1592,124 @@
     document.getElementById('food-after').classList.toggle('selected', value === 'after');
   }
 
+  function selectStartMode(mode) {
+    selectedStartMode = mode === 'date' ? 'date' : 'today';
+    document.getElementById('startTodayBtn').classList.toggle('selected', selectedStartMode === 'today');
+    document.getElementById('selectStartDateBtn').classList.toggle('selected', selectedStartMode === 'date');
+    document.getElementById('startDateWrap').classList.toggle('show', selectedStartMode === 'date');
+    if (selectedStartMode === 'date' && !document.getElementById('medicineStartDate').value) {
+      document.getElementById('medicineStartDate').value = todayKey();
+    }
+  }
+
+  function toggleDurationMenu(event) {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById('durationMenu');
+    const trigger = document.getElementById('durationTrigger');
+    const open = menu.classList.toggle('open');
+    trigger.classList.toggle('open', open);
+    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  function closeDurationMenu() {
+    const menu = document.getElementById('durationMenu');
+    const trigger = document.getElementById('durationTrigger');
+    menu.classList.remove('open');
+    trigger.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  function selectDurationUnit(unit) {
+    const allowed = ['days','weeks','months','years','indefinite'];
+    selectedDurationUnit = allowed.includes(unit) ? unit : 'indefinite';
+    const label = selectedDurationUnit.charAt(0).toUpperCase() + selectedDurationUnit.slice(1);
+    document.getElementById('durationUnitLabel').textContent = label;
+    document.querySelectorAll('[data-duration-unit]').forEach(option => {
+      option.classList.toggle('selected', option.dataset.durationUnit === selectedDurationUnit);
+    });
+
+    const numberInput = document.getElementById('durationValue');
+    const indefinite = selectedDurationUnit === 'indefinite';
+    numberInput.disabled = indefinite;
+    if (indefinite) numberInput.value = '';
+    document.getElementById('durationHelper').textContent = indefinite
+      ? 'This medicine continues until you change or remove it.'
+      : 'The start date counts as the first day of the course.';
+    closeDurationMenu();
+  }
+
+  document.addEventListener('click', event => {
+    if (!document.getElementById('durationSelect').contains(event.target)) closeDurationMenu();
+  });
+
+  function clearMedicineChecks(id) {
+    Object.keys(state.checks).forEach(day => {
+      Object.keys(state.checks[day] || {}).forEach(key => {
+        if (key.startsWith(id + '_')) delete state.checks[day][key];
+      });
+    });
+  }
+
   function addOrUpdateMedicine() {
     const name = document.getElementById('medNameInput').value.trim();
     if (!name)                 { showToast('Please enter a medicine name'); return; }
-    if (selectedTimes.size === 0) { showToast('Please select at least one time slot'); return; }
+    if (doseDrafts.length === 0)  { showToast('Please select at least one time slot'); return; }
     if (selectedDays.size === 0)  { showToast('Please select at least one day'); return; }
     if (!selectedFood)            { showToast('Please select food timing'); return; }
 
-    const doses = [...selectedTimes].map(t => ({ time: t, food: selectedFood }));
+    const invalidCustomTime = doseDrafts.some(dose =>
+      dose.useDefaultTime === false && !/^([01]\d|2[0-3]):[0-5]\d$/.test(dose.customTime || '')
+    );
+    if (invalidCustomTime) { showToast('Please enter a valid time for every dose'); return; }
+
+    const effectiveTimes = doseDrafts.map(dose => getEffectiveDoseTime(dose));
+    if (new Set(effectiveTimes).size !== effectiveTimes.length) {
+      showToast('Two doses cannot use the same exact time'); return;
+    }
+
+    const startDate = selectedStartMode === 'today'
+      ? todayKey()
+      : document.getElementById('medicineStartDate').value;
+    if (!isValidDateKey(startDate)) { showToast('Please select a valid start date'); return; }
+
+    const rawDuration = Number(document.getElementById('durationValue').value);
+    const durationValue = selectedDurationUnit === 'indefinite' ? null : rawDuration;
+    if (selectedDurationUnit !== 'indefinite' &&
+        (!Number.isInteger(durationValue) || durationValue < 1 || durationValue > 9999)) {
+      showToast('Enter a duration between 1 and 9999'); return;
+    }
+
+    const duplicateName = state.medicines.some(med =>
+      med.id !== editingMedId && med.name.toLowerCase() === name.toLowerCase()
+    );
+    if (duplicateName) { showToast('Medicine already exists'); return; }
+
+    const doses = doseDrafts.map(dose => ({
+      id: dose.id,
+      time: dose.slot,
+      slot: dose.slot,
+      useDefaultTime: dose.useDefaultTime !== false,
+      customTime: dose.useDefaultTime !== false ? null : dose.customTime,
+      food: selectedFood
+    }));
     const days  = DAY_ORDER.filter(d => selectedDays.has(d));
+    const endDate = calculateEndDate(startDate, selectedDurationUnit, durationValue);
 
     if (editingMedId) {
       const idx = state.medicines.findIndex(m => m.id === editingMedId);
       if (idx !== -1) {
-        state.medicines[idx] = { id: editingMedId, name, doses, days };
+        state.medicines[idx] = {
+          ...state.medicines[idx], id: editingMedId, name, doses, days,
+          startDate, durationUnit: selectedDurationUnit, durationValue, endDate
+        };
+        clearMedicineChecks(editingMedId);
       }
       showToast('✅ Medicine updated!');
     } else {
-      if (state.medicines.some(m => m.name.toLowerCase() === name.toLowerCase())) {
-        showToast('Medicine already exists'); return;
-      }
-      state.medicines.push({ id: uuid(), name, doses, days });
+      state.medicines.push({
+        id: uuid(), name, doses, days, startDate,
+        durationUnit: selectedDurationUnit, durationValue, endDate
+      });
       showToast('✅ ' + name + ' added!');
     }
 
@@ -1141,10 +1725,14 @@
 
     document.getElementById('medNameInput').value = med.name;
 
-    selectedTimes = new Set(med.doses.map(d => d.time));
-    document.querySelectorAll('[data-time]').forEach(b =>
-      b.classList.toggle('selected', selectedTimes.has(b.dataset.time))
-    );
+    doseDrafts = (med.doses || []).map(dose => ({
+      id: dose.id || uuid(),
+      slot: getDoseSlot(dose),
+      useDefaultTime: dose.useDefaultTime !== false,
+      customTime: dose.useDefaultTime !== false ? null : dose.customTime
+    }));
+    syncTimePills();
+    renderDoseTimeEditors();
 
     selectedFood = med.doses[0]?.food || null;
     document.getElementById('food-before').classList.toggle('selected', selectedFood === 'before');
@@ -1157,6 +1745,17 @@
     );
     updateAllDaysBtn();
 
+    selectedStartMode = med.startDate === todayKey() ? 'today' : 'date';
+    document.getElementById('medicineStartDate').value = med.startDate || todayKey();
+    selectStartMode(selectedStartMode);
+
+    selectedDurationUnit = med.durationUnit || 'indefinite';
+    document.getElementById('durationValue').value = med.durationValue || '';
+    selectDurationUnit(selectedDurationUnit);
+    if (selectedDurationUnit !== 'indefinite') {
+      document.getElementById('durationValue').value = med.durationValue || 1;
+    }
+
     document.getElementById('addSubmitBtn').textContent = 'Update Medicine';
     document.getElementById('addFormTitle').textContent = 'Edit Medicine';
     document.getElementById('addFormSub').textContent   = 'Update the medication details.';
@@ -1167,11 +1766,7 @@
     const med = state.medicines.find(m => m.id === id);
     if (!med) return;
     state.medicines = state.medicines.filter(m => m.id !== id);
-    Object.keys(state.checks).forEach(day => {
-      Object.keys(state.checks[day] || {}).forEach(k => {
-        if (k.startsWith(id + '_')) delete state.checks[day][k];
-      });
-    });
+    clearMedicineChecks(id);
     saveState();
     renderMeds();
     showToast('🗑 ' + med.name + ' removed');
@@ -1179,16 +1774,21 @@
 
   function resetAddForm() {
     document.getElementById('medNameInput').value = '';
-    selectedTimes.clear();
+    doseDrafts = [];
     selectedFood  = null;
     selectedDays  = new Set(DAY_ORDER);
     editingMedId  = null;
 
-    document.querySelectorAll('[data-time]').forEach(b => b.classList.remove('selected'));
+    syncTimePills();
+    renderDoseTimeEditors();
     document.querySelectorAll('[data-day]').forEach(b  => b.classList.add('selected'));
     document.getElementById('allDaysBtn').classList.add('selected');
     document.getElementById('food-before').classList.remove('selected');
     document.getElementById('food-after').classList.remove('selected');
+    document.getElementById('medicineStartDate').value = todayKey();
+    selectStartMode('today');
+    document.getElementById('durationValue').value = '';
+    selectDurationUnit('indefinite');
     document.getElementById('addSubmitBtn').textContent  = 'Add Medicine';
     document.getElementById('addFormTitle').textContent  = 'Add Medicine';
     document.getElementById('addFormSub').textContent    = 'Set up a daily medication entry.';
@@ -1254,11 +1854,7 @@ function get24hFromSelects(slot) {
 }
 
 function loadSlotTimes() {
-  let times = { ...DEFAULT_TIMES };
-  try {
-    const saved = localStorage.getItem('meditrack_slot_times');
-    if (saved) times = { ...DEFAULT_TIMES, ...JSON.parse(saved) };
-  } catch(e) {}
+  const times = readSlotTimes();
   SLOT_IDS.forEach(slot => set12hFrom24h(slot, times[slot]));
 }
 
