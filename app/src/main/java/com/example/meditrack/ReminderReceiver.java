@@ -37,6 +37,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         String json = AlarmScheduler.getMedicinesJson(context);
         ArrayList<String> medNames = new ArrayList<>();
         ArrayList<String> medFoods = new ArrayList<>();
+        ArrayList<String> medTimes = new ArrayList<>();
+        ArrayList<String> medSlots = new ArrayList<>();
 
         try {
             JSONArray medicines = new JSONArray(json);
@@ -51,6 +53,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 if (doses == null) continue;
 
                 String matchedFood = null;
+                String matchedTime = null;
                 for (int j = 0; j < doses.length(); j++) {
                     JSONObject dose = doses.optJSONObject(j);
                     if (dose == null) continue;
@@ -62,6 +65,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                         matchedFood = "after".equals(dose.optString("food"))
                                 ? "after"
                                 : "before";
+                        matchedTime = effectiveTime;
                         break;
                     }
                 }
@@ -71,6 +75,8 @@ public class ReminderReceiver extends BroadcastReceiver {
                     if (!name.isEmpty()) {
                         medNames.add(name);
                         medFoods.add(matchedFood);
+                        medTimes.add(matchedTime == null ? "" : matchedTime);
+                        medSlots.add(slotId);
                     }
                 }
             }
@@ -94,6 +100,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         );
         serviceIntent.putStringArrayListExtra("med_names", medNames);
         serviceIntent.putStringArrayListExtra("med_foods", medFoods);
+        serviceIntent.putStringArrayListExtra("med_times", medTimes);
+        serviceIntent.putStringArrayListExtra("med_slots", medSlots);
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
