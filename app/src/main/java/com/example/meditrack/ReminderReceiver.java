@@ -90,6 +90,22 @@ public class ReminderReceiver extends BroadcastReceiver {
             return;
         }
 
+        if (!NotificationAccess.areNotificationsEnabled(context)) {
+            NotificationAccess.recordBlockedReminder(
+                    context,
+                    alarmKey,
+                    AlarmScheduler.calendarDateKey(dueDate),
+                    medNames
+            );
+            Log.w(
+                    TAG,
+                    "Suppressed alarm " + alarmKey
+                            + " because no visible notification or Dismiss action can be shown"
+            );
+            AlarmScheduler.scheduleAllAlarms(context);
+            return;
+        }
+
         Intent serviceIntent = new Intent(context, ReminderService.class);
         serviceIntent.putExtra("slot_id", slotId);
         serviceIntent.putExtra("alarm_time", alarmTime);

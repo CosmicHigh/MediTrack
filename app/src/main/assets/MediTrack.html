@@ -102,6 +102,26 @@
     .view { display: none; }
     .view.active { display: block; }
 
+    /* ── Notification access safeguard ── */
+    .notification-warning {
+      display: none; align-items: center; gap: 12px;
+      background: #FFF4E8; border: 2px solid #F4C38F;
+      border-radius: var(--radius); padding: 14px;
+      margin-bottom: 18px; color: #65390A;
+      box-shadow: var(--shadow);
+    }
+    .notification-warning.show { display: flex; }
+    .notification-warning-icon { font-size: 26px; flex-shrink: 0; }
+    .notification-warning-copy { flex: 1; min-width: 0; }
+    .notification-warning-title { font-size: 16px; font-weight: 900; line-height: 1.2; }
+    .notification-warning-text { font-size: 13px; font-weight: 700; line-height: 1.4; margin-top: 3px; }
+    .notification-warning-button {
+      min-height: 44px; border: none; border-radius: 12px;
+      padding: 0 14px; background: #9A4D00; color: white;
+      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900;
+      cursor: pointer; flex-shrink: 0;
+    }
+
     /* ── Progress Card ── */
     .progress-card {
       background: var(--teal);
@@ -451,6 +471,31 @@
     .settings-header h2 { font-size: 24px; font-weight: 900; color: var(--text); }
     .settings-header p  { font-size: 14px; color: var(--muted); margin-top: 3px; font-weight: 600; }
 
+    .notification-status-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+      display: flex; align-items: center; gap: 13px;
+      margin-bottom: 18px; box-shadow: var(--shadow);
+    }
+    .notification-status-card.enabled { border-color: #A7DCC7; }
+    .notification-status-card.blocked { border-color: #F4C38F; background: #FFF9F2; }
+    .notification-status-dot {
+      width: 13px; height: 13px; border-radius: 50%;
+      background: var(--muted); flex-shrink: 0;
+    }
+    .notification-status-card.enabled .notification-status-dot { background: #17845D; }
+    .notification-status-card.blocked .notification-status-dot { background: #C45F00; }
+    .notification-status-copy { flex: 1; min-width: 0; }
+    .notification-status-title { font-size: 16px; font-weight: 900; color: var(--text); }
+    .notification-status-text { font-size: 13px; font-weight: 700; line-height: 1.4; color: var(--muted); margin-top: 2px; }
+    .notification-status-button {
+      display: none; min-height: 44px; border: none; border-radius: 12px;
+      padding: 0 13px; background: var(--teal); color: white;
+      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 900;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .notification-status-card.blocked .notification-status-button { display: block; }
+
     .time-setting-card {
       background: var(--surface);
       border-radius: var(--radius);
@@ -524,6 +569,8 @@
       .dose-time-copy { flex-basis: calc(100% - 52px); }
       .dose-time-actions { margin-left: auto; }
       .duration-row { grid-template-columns: 1fr; }
+      .notification-warning, .notification-status-card { align-items: flex-start; flex-wrap: wrap; }
+      .notification-warning-button, .notification-status-button { margin-left: 38px; }
     }
   </style>
 </head>
@@ -546,6 +593,15 @@
 </nav>
 
 <main>
+
+  <div class="notification-warning" id="notificationWarning" role="alert">
+    <div class="notification-warning-icon" aria-hidden="true">🔕</div>
+    <div class="notification-warning-copy">
+      <div class="notification-warning-title">Medicine alarms are off</div>
+      <div class="notification-warning-text" id="notificationWarningText">Enable notifications so alarms can appear with a safe Dismiss control.</div>
+    </div>
+    <button type="button" class="notification-warning-button" onclick="openNotificationSettings()">Enable</button>
+  </div>
 
   <!-- ── TODAY VIEW ── -->
   <div class="view active" id="view-today">
@@ -691,6 +747,15 @@
     <div class="settings-header">
       <h2>⏰ Reminder Times</h2>
       <p>Set when you want to be reminded for each slot.</p>
+    </div>
+
+    <div class="notification-status-card" id="notificationStatusCard">
+      <div class="notification-status-dot" aria-hidden="true"></div>
+      <div class="notification-status-copy">
+        <div class="notification-status-title" id="notificationStatusTitle">Checking alarm access…</div>
+        <div class="notification-status-text" id="notificationStatusText">MediTrack is checking whether medicine alarms can be displayed.</div>
+      </div>
+      <button type="button" class="notification-status-button" onclick="openNotificationSettings()">Enable</button>
     </div>
 
     <div class="time-setting-card">
@@ -976,6 +1041,61 @@
     } catch(e) {
       console.log('Android bridge sync: ' + e);
     }
+  }
+
+  let notificationAccessState = { enabled: null, blockedCount: 0, lastBlockedAt: 0 };
+
+  function setNotificationAccessState(nextState) {
+    if (!nextState || typeof nextState !== 'object') return;
+    notificationAccessState = {
+      enabled: nextState.enabled === true,
+      blockedCount: Math.max(0, Number(nextState.blockedCount) || 0),
+      lastBlockedAt: Math.max(0, Number(nextState.lastBlockedAt) || 0)
+    };
+    updateNotificationAccessUI();
+  }
+
+  function updateNotificationAccessUI() {
+    const enabled = notificationAccessState.enabled;
+    const warning = document.getElementById('notificationWarning');
+    const warningText = document.getElementById('notificationWarningText');
+    const statusCard = document.getElementById('notificationStatusCard');
+    const statusTitle = document.getElementById('notificationStatusTitle');
+    const statusText = document.getElementById('notificationStatusText');
+    if (!warning || !statusCard) return;
+
+    warning.classList.toggle('show', enabled === false);
+    statusCard.classList.toggle('enabled', enabled === true);
+    statusCard.classList.toggle('blocked', enabled === false);
+
+    if (enabled === true) {
+      statusTitle.textContent = 'Medicine alarms enabled';
+      statusText.textContent = 'Full-screen reminders and their Dismiss control are available.';
+      return;
+    }
+
+    if (enabled === false) {
+      const count = notificationAccessState.blockedCount;
+      statusTitle.textContent = 'Medicine alarms need notification access';
+      statusText.textContent = count > 0
+        ? `${count} scheduled ${count === 1 ? 'alert was' : 'alerts were'} safely suppressed while access was off. Review Today, then enable notifications.`
+        : 'Enable notifications before relying on scheduled medicine alarms.';
+      warningText.textContent = count > 0
+        ? `${count} scheduled ${count === 1 ? 'alert needs' : 'alerts need'} review. Enable notifications to restore alarms.`
+        : 'Enable notifications so alarms can appear with a safe Dismiss control.';
+    }
+  }
+
+  function openNotificationSettings() {
+    try {
+      if (window.Android && typeof Android.openNotificationSettings === 'function') {
+        Android.openNotificationSettings();
+        return;
+      }
+    } catch(e) {
+      console.log('Notification settings bridge: ' + e);
+    }
+    showToast('Open Android Settings → Apps → MediTrack → Notifications');
   }
 
   // ── State ──────────────────────────────────────────────

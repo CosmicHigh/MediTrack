@@ -27,7 +27,7 @@ import java.util.Calendar;
 public class ReminderService extends Service {
 
     private static final String TAG = "ReminderService";
-    private static final String CHANNEL_ID = "meditrack_reminder_v2";
+    static final String CHANNEL_ID = "meditrack_reminder_v2";
     private static final int RC_OPEN_REMINDER = 2101;
     private static final int RC_DISMISS_REMINDER = 2102;
 
@@ -99,6 +99,23 @@ public class ReminderService extends Service {
 
         if (activePayload.isEmpty()) {
             if (!wasActive) stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        // Defence in depth for the narrow race where access is revoked after the
+        // BroadcastReceiver check but before this service begins alarm output.
+        if (!NotificationAccess.areNotificationsEnabled(this)) {
+            NotificationAccess.recordBlockedReminder(
+                    this,
+                    activeAlarmKey,
+                    activeScheduledDate,
+                    activePayload.copyNames()
+            );
+            Log.w(TAG, "Stopping reminder because notification access is unavailable");
+            activePayload.clear();
+            activeAlarmKey = "";
+            activeScheduledDate = "";
+            stopSelfResult(startId);
             return START_NOT_STICKY;
         }
 

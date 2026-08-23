@@ -21,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean notificationRequestPending;
     private boolean exactAlarmRequestOffered;
     private boolean fullScreenSettingsOpened;
+    private boolean webPageReady;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                webPageReady = true;
                 // Re-send the persisted WebView state after every full page load.
                 view.evaluateJavascript(
                         "(function() {" +
@@ -66,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
                                 "})();",
                         null
                 );
+                publishNotificationAccessState();
             }
         });
 
@@ -92,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Exact-alarm access can be granted or revoked while the app is outside this Activity.
         AlarmScheduler.scheduleAllAlarms(getApplicationContext());
+        publishNotificationAccessState();
 
         if (!notificationRequestPending && webView != null) {
             webView.postDelayed(this::ensureSpecialAlarmAccess, 250L);
@@ -109,7 +115,9 @@ public class MainActivity extends AppCompatActivity {
                 && ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
-        ) != PackageManager.PERMISSION_GRANTED) {
+        ) != PackageManager.PERMISSION_GRANTED
+                && !NotificationAccess.wasRuntimePermissionRequested(this)) {
+            NotificationAccess.markRuntimePermissionRequested(this);
             notificationRequestPending = true;
             ActivityCompat.requestPermissions(
                     this,
@@ -128,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQ_NOTIFICATIONS) {
             notificationRequestPending = false;
+            publishNotificationAccessState();
             if (webView != null) {
                 webView.postDelayed(this::ensureSpecialAlarmAccess, 250L);
             }
@@ -137,6 +146,10 @@ public class MainActivity extends AppCompatActivity {
     private void ensureSpecialAlarmAccess() {
         if (!activityResumed || isFinishing() || isDestroyed()) return;
         if (!AlarmScheduler.hasAnyMedicineDoses(getApplicationContext())) return;
+        if (!NotificationAccess.areNotificationsEnabled(this)) {
+            publishNotificationAccessState();
+            return;
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             AlarmManager alarmManager =
@@ -205,6 +218,53 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void publishNotificationAccessState() {
+        boolean enabled = NotificationAccess.areNotificationsEnabled(this);
+        boolean restored = NotificationAccess.rememberStateAndWasRestored(this, enabled);
+        if (restored) {
+            Log.i(TAG, "Notification access restored; rebuilding medicine alarms");
+            AlarmScheduler.scheduleAllAlarms(getApplicationContext());
+        }
+
+        if (!webPageReady || webView == null) return;
+
+        try {
+            JSONObject status = new JSONObject();
+            status.put("enabled", enabled);
+            status.put(
+                    "blockedCount",
+                    NotificationAccess.getBlockedReminderCount(this)
+            );
+            status.put("lastBlockedAt", NotificationAccess.getLastBlockedAt(this));
+            String script = "window.setNotificationAccessState && "
+                    + "window.setNotificationAccessState(" + status + ");";
+            webView.evaluateJavascript(script, null);
+        } catch (Exception error) {
+            Log.w(TAG, "Could not publish notification access state", error);
+        }
+    }
+
+    private void openNotificationSettings() {
+        runOnUiThread(() -> {
+            try {
+                Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                startActivity(intent);
+            } catch (RuntimeException error) {
+                Log.w(TAG, "App notification settings are unavailable", error);
+                try {
+                    Intent fallback = new Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.parse("package:" + getPackageName())
+                    );
+                    startActivity(fallback);
+                } catch (RuntimeException fallbackError) {
+                    Log.e(TAG, "App settings are unavailable", fallbackError);
+                }
+            }
+        });
+    }
+
     /**
      * JavaScript interface called whenever PWA medicine data or slot defaults change.
      */
@@ -229,6 +289,11 @@ public class MainActivity extends AppCompatActivity {
                     getApplicationContext(),
                     timesJson
             );
+        }
+
+        @JavascriptInterface
+        public void openNotificationSettings() {
+            MainActivity.this.openNotificationSettings();
         }
     }
 }
