@@ -5,836 +5,2008 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MediTrack</title>
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#2C6E6A" />
+  <meta name="theme-color" content="#F4F7F8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="MediTrack" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet" />
-
   <style>
-    :root {
-      --bg:          #F5F0E8;
-      --surface:     #FFFFFF;
-      --teal:        #2C6E6A;
-      --teal-lt:     #3D8C87;
-      --teal-pale:   #E0F0EF;
-      --coral:       #D95F3B;
-      --coral-lt:    #FDEEE9;
-      --text:        #1A2B2B;
-      --muted:       #7A9090;
-      --border:      #E2E8E8;
-      --morning:     #F59E0B;
-      --morning-bg:  #FFFBEB;
-      --afternoon:   #0EA5E9;
-      --afternoon-bg:#EFF9FF;
-      --evening:     #8B5CF6;
-      --evening-bg:  #F5F0FF;
-      --night:       #334155;
-      --night-bg:    #F1F4F8;
-      --radius:      16px;
-      --shadow:      0 2px 12px rgba(0,0,0,0.07);
+    :root{
+      color-scheme: light;
+      --bg:#f4f7f8;
+      --bg-deep:#eaf0f2;
+      --surface:rgba(255,255,255,.82);
+      --surface-strong:#ffffff;
+      --surface-soft:rgba(255,255,255,.64);
+      --glass:rgba(255,255,255,.60);
+      --glass-strong:rgba(255,255,255,.76);
+      --text:#102027;
+      --muted:#6e7d83;
+      --faint:#98a6ab;
+      --line:rgba(41,65,72,.10);
+      --line-strong:rgba(41,65,72,.16);
+      --shadow:0 16px 42px rgba(43,62,68,.10);
+      --shadow-soft:0 8px 24px rgba(43,62,68,.07);
+      --accent:#5f8f8a;
+      --accent-deep:#3e706c;
+      --accent-soft:#dcecea;
+      --danger:#c55656;
+      --danger-soft:#f8e7e7;
+      --morning:#e3a13a;
+      --afternoon:#5f9ec7;
+      --evening:#8a73bf;
+      --night:#59667e;
+      --success:#5d9275;
+      --radius-xl:30px;
+      --radius-lg:24px;
+      --radius-md:18px;
+      --radius-sm:14px;
+      --safe-top:max(env(safe-area-inset-top), 0px);
+      --safe-bottom:max(env(safe-area-inset-bottom), 0px);
+      --spring:cubic-bezier(.22,.9,.24,1);
+      --fast:180ms;
+      --normal:320ms;
+      --slow:520ms;
+    }
+    [data-theme="dark"]{
+      color-scheme: dark;
+      --bg:#0d1317;
+      --bg-deep:#10191f;
+      --surface:rgba(25,34,40,.78);
+      --surface-strong:#182126;
+      --surface-soft:rgba(25,34,40,.58);
+      --glass:rgba(26,36,42,.56);
+      --glass-strong:rgba(28,39,45,.74);
+      --text:#eef5f6;
+      --muted:#9aabb0;
+      --faint:#718087;
+      --line:rgba(229,245,248,.09);
+      --line-strong:rgba(229,245,248,.15);
+      --shadow:0 18px 46px rgba(0,0,0,.28);
+      --shadow-soft:0 10px 26px rgba(0,0,0,.20);
+      --accent:#83b8b3;
+      --accent-deep:#a6d2ce;
+      --accent-soft:rgba(95,143,138,.18);
+      --danger:#e08b8b;
+      --danger-soft:rgba(197,86,86,.17);
+      --success:#7eb596;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      font-family: 'Nunito', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      max-width: 480px;
-      margin: 0 auto;
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html{background:var(--bg);scroll-behavior:smooth}
+    body{
+      min-height:100dvh;
+      margin:0;
+      overflow-x:hidden;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;
+      transition:background .35s ease,color .35s ease;
+    }
+    button,input,select{font:inherit}
+    button{color:inherit}
+    svg{display:block}
+    .app-shell{
+      min-height:100dvh;
+      width:min(100%, 560px);
+      margin:0 auto;
+      position:relative;
+      isolation:isolate;
+      padding-bottom:calc(118px + var(--safe-bottom));
     }
 
-    /* ── Header ── */
-    header {
-      background: var(--teal);
-      color: white;
-      padding: 20px 20px 16px;
-      padding-top: calc(20px + env(safe-area-inset-top));
-      position: sticky;
-      top: 0;
-      z-index: 100;
+    /* Atmospheric canvas */
+    .ambient{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:-2;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(147,210,204,.16), transparent 28%),
+        radial-gradient(circle at 88% 18%, rgba(230,178,118,.12), transparent 29%),
+        linear-gradient(180deg,var(--bg),var(--bg-deep));
+      transition:background 1.2s ease;
     }
-    .header-row { display: flex; align-items: center; justify-content: space-between; }
-    .app-name { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; }
-    .date-pill {
-      background: rgba(255,255,255,0.18);
-      border-radius: 20px; padding: 4px 12px;
-      font-size: 13px; font-weight: 600;
+    .ambient::before,.ambient::after{
+      content:"";
+      position:absolute;
+      width:320px;height:320px;border-radius:50%;
+      filter:blur(72px);
+      opacity:.24;
+      transform:translateZ(0);
+      transition:background 1.2s ease,transform 1.2s var(--spring),opacity .4s ease;
     }
-    .week-label {
-      margin-top: 6px; font-size: 12px; opacity: 0.72;
-      font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    .ambient::before{top:-110px;left:-120px;background:#9fd4d0}
+    .ambient::after{bottom:70px;right:-150px;background:#d8b487}
+    body[data-period="afternoon"] .ambient::before{background:#8bc7e4;transform:translate(24px,36px)}
+    body[data-period="afternoon"] .ambient::after{background:#9fcae7}
+    body[data-period="evening"] .ambient::before{background:#d49ab2;transform:translate(40px,22px)}
+    body[data-period="evening"] .ambient::after{background:#9b8fd0}
+    body[data-period="night"] .ambient::before{background:#394d78;opacity:.32;transform:translate(30px,36px)}
+    body[data-period="night"] .ambient::after{background:#4c3f6c;opacity:.28}
+    [data-theme="dark"] .ambient{background:
+      radial-gradient(circle at 16% 8%, rgba(92,140,150,.14), transparent 30%),
+      radial-gradient(circle at 88% 18%, rgba(91,77,118,.13), transparent 28%),
+      linear-gradient(180deg,var(--bg),var(--bg-deep))}
+    [data-theme="dark"] .ambient::before,[data-theme="dark"] .ambient::after{opacity:.18}
+
+    /* Shared glass */
+    .glass{
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,.48);
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(22px) saturate(1.35);
+      -webkit-backdrop-filter:blur(22px) saturate(1.35);
+    }
+    [data-theme="dark"] .glass{border-color:rgba(255,255,255,.08)}
+
+    /* Floating top chrome */
+    .topbar-wrap{
+      position:sticky;
+      top:0;
+      z-index:90;
+      padding:calc(12px + var(--safe-top)) 14px 8px;
+      pointer-events:none;
+    }
+    .topbar{
+      min-height:60px;
+      border-radius:24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px 10px 16px;
+      pointer-events:auto;
+      transition:transform var(--normal) var(--spring),background .3s ease;
+    }
+    .brand-block{min-width:0}
+    .app-name{
+      font-size:19px;
+      letter-spacing:-.45px;
+      font-weight:760;
+      line-height:1.1;
+    }
+    .week-label{
+      margin-top:4px;
+      font-size:11.5px;
+      color:var(--muted);
+      font-weight:620;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:250px;
+    }
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .date-pill{
+      min-height:38px;
+      display:flex;align-items:center;
+      padding:0 12px;
+      border-radius:16px;
+      background:rgba(255,255,255,.36);
+      border:1px solid rgba(255,255,255,.34);
+      font-size:12px;
+      font-weight:700;
+      color:var(--text);
+      white-space:nowrap;
+    }
+    [data-theme="dark"] .date-pill{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.08)}
+    .icon-btn{
+      width:38px;height:38px;border-radius:15px;border:0;
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.36);
+      border:1px solid rgba(255,255,255,.34);
+      cursor:pointer;
+      transition:transform var(--fast) ease,background var(--fast) ease;
+    }
+    [data-theme="dark"] .icon-btn{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.08)}
+    .icon-btn:active{transform:scale(.92)}
+    .icon-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+    main{
+      padding:12px 16px 0;
+      position:relative;
+    }
+    .screen-view{display:none;animation:viewIn .36s var(--spring)}
+    .screen-view.active{display:block}
+    @keyframes viewIn{
+      from{opacity:0;transform:translateY(10px) scale(.992)}
+      to{opacity:1;transform:none}
     }
 
-    /* ── Tabs ── */
-    nav.tabs {
-      display: flex;
-      background: var(--surface);
-      border-bottom: 1.5px solid var(--border);
-      position: sticky;
-      top: calc(72px + env(safe-area-inset-top));
-      z-index: 99;
+    /* Section title */
+    .page-heading{
+      display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+      padding:10px 2px 16px;
     }
-    nav.tabs button {
-      flex: 1; border: none; background: none;
-      padding: 12px 0 10px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 12.5px; font-weight: 700;
-      color: var(--muted); cursor: pointer;
-      position: relative; transition: color 0.2s;
-      letter-spacing: 0.2px;
+    .eyebrow{
+      font-size:11px;
+      letter-spacing:.11em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:780;
     }
-    nav.tabs button.active { color: var(--teal); }
-    nav.tabs button.active::after {
-      content: ''; position: absolute;
-      bottom: 0; left: 15%; right: 15%;
-      height: 3px; background: var(--teal);
-      border-radius: 3px 3px 0 0;
+    .page-heading h1,.page-heading h2{
+      margin-top:4px;
+      font-size:30px;
+      line-height:1;
+      letter-spacing:-1.05px;
+      font-weight:780;
+    }
+    .page-meta{
+      font-size:12px;color:var(--muted);font-weight:650;
+      padding-bottom:3px;
     }
 
-    /* ── Main ── */
-    main { flex: 1; overflow-y: auto; padding: 20px 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
-    .view { display: none; }
-    .view.active { display: block; }
+    /* Dose horizon */
+    .progress-card{
+      border-radius:var(--radius-xl);
+      padding:19px 19px 17px;
+      margin-bottom:22px;
+      background:linear-gradient(135deg,rgba(255,255,255,.88),rgba(255,255,255,.62));
+      border:1px solid rgba(255,255,255,.64);
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    [data-theme="dark"] .progress-card{
+      background:linear-gradient(135deg,rgba(31,43,49,.91),rgba(24,33,39,.72));
+      border-color:rgba(255,255,255,.08)
+    }
+    .progress-card::after{
+      content:"";
+      position:absolute;
+      width:160px;height:160px;border-radius:50%;
+      right:-58px;top:-78px;
+      background:radial-gradient(circle,rgba(112,176,170,.20),transparent 70%);
+      pointer-events:none;
+    }
+    .pc-day{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      font-size:11px;color:var(--muted);font-weight:760;
+      letter-spacing:.08em;text-transform:uppercase;
+    }
+    .pc-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 5px rgba(95,143,138,.11);
+    }
+    .pc-main{
+      margin-top:9px;
+      font-size:31px;line-height:1.02;font-weight:790;letter-spacing:-1.15px;
+    }
+    .pc-sub{margin-top:6px;font-size:13.5px;color:var(--muted);font-weight:620}
+    .pc-bar-wrap{
+      height:8px;border-radius:999px;background:rgba(99,122,129,.12);
+      margin-top:17px;overflow:hidden;
+    }
+    .pc-bar-fill{
+      height:100%;width:0;border-radius:999px;
+      background:linear-gradient(90deg,var(--accent),#9ac9c5);
+      transition:width .55s var(--spring);
+      box-shadow:0 0 18px rgba(95,143,138,.25);
+    }
+    .pc-completed{margin-top:9px;text-align:right;font-size:10.5px;color:var(--muted);font-weight:740;letter-spacing:.06em}
 
-    /* ── Notification access safeguard ── */
-    .notification-warning {
-      display: none; align-items: center; gap: 12px;
-      background: #FFF4E8; border: 2px solid #F4C38F;
-      border-radius: var(--radius); padding: 14px;
-      margin-bottom: 18px; color: #65390A;
-      box-shadow: var(--shadow);
+    /* All-clear state */
+    .all-clear{
+      display:none;
+      border-radius:var(--radius-xl);
+      margin-bottom:22px;
+      overflow:hidden;
+      background:linear-gradient(135deg,rgba(117,170,146,.22),rgba(129,178,174,.13));
+      border:1px solid rgba(105,163,136,.20);
+      box-shadow:var(--shadow-soft);
     }
-    .notification-warning.show { display: flex; }
-    .notification-warning-icon { font-size: 26px; flex-shrink: 0; }
-    .notification-warning-copy { flex: 1; min-width: 0; }
-    .notification-warning-title { font-size: 16px; font-weight: 900; line-height: 1.2; }
-    .notification-warning-text { font-size: 13px; font-weight: 700; line-height: 1.4; margin-top: 3px; }
-    .notification-warning-button {
-      min-height: 44px; border: none; border-radius: 12px;
-      padding: 0 14px; background: #9A4D00; color: white;
-      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900;
-      cursor: pointer; flex-shrink: 0;
+    .all-clear.show{display:block;animation:completionIn .58s var(--spring)}
+    @keyframes completionIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+    .all-clear-top{padding:22px 20px;text-align:left;cursor:pointer;user-select:none;position:relative}
+    .all-clear-top::before{
+      content:"✓";
+      width:44px;height:44px;border-radius:18px;
+      display:grid;place-items:center;
+      background:rgba(101,153,125,.15);
+      color:var(--success);
+      font-weight:850;font-size:22px;
+      margin-bottom:14px;
     }
+    .ac-emoji{display:none}
+    .ac-title{font-size:22px;font-weight:780;letter-spacing:-.55px}
+    .ac-sub{font-size:13px;color:var(--muted);margin-top:5px;font-weight:610;max-width:350px}
+    .ac-hint{font-size:11.5px;color:var(--muted);margin-top:12px;font-weight:680}
+    .all-clear-body{display:none;padding:0 12px 12px}
+    .all-clear-body.open{display:block}
+    .slot-title-ac{font-size:11px;font-weight:760;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:9px 4px 6px}
 
-    /* ── Progress Card ── */
-    .progress-card {
-      background: var(--teal);
-      color: white;
-      border-radius: 20px;
-      padding: 22px 22px 18px;
-      margin-bottom: 20px;
+    /* Timeline */
+    .timeline{position:relative}
+    .slot-section{
+      position:relative;
+      padding-left:34px;
+      margin-bottom:24px;
     }
-    .pc-day {
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 12px; font-weight: 800;
-      letter-spacing: 1px; text-transform: uppercase;
-      opacity: 0.72; margin-bottom: 10px;
+    .slot-section::before{
+      content:"";
+      position:absolute;
+      left:13px;top:31px;bottom:-26px;width:1px;
+      background:linear-gradient(var(--line-strong),var(--line));
     }
-    .pc-dot { width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%; }
-    .pc-main { font-size: 46px; font-weight: 900; line-height: 1; letter-spacing: -1px; margin-bottom: 4px; }
-    .pc-sub  { font-size: 16px; font-weight: 600; opacity: 0.85; margin-bottom: 18px; }
-    .pc-bar-wrap { background: rgba(255,255,255,0.25); border-radius: 10px; height: 9px; overflow: hidden; margin-bottom: 10px; }
-    .pc-bar-fill { background: white; height: 100%; border-radius: 10px; transition: width 0.4s ease; }
-    .pc-completed { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.75; text-align: right; }
+    .slot-section:last-child::before{display:none}
+    .slot-header{
+      min-height:30px;
+      display:flex;align-items:center;gap:10px;
+      margin-bottom:10px;
+      position:relative;
+    }
+    .slot-icon{
+      width:28px;height:28px;border-radius:50%;
+      position:absolute;left:-34px;
+      display:grid;place-items:center;
+      background:var(--surface-strong);
+      border:1px solid var(--line);
+      box-shadow:0 3px 12px rgba(40,62,68,.08);
+      color:var(--muted);
+      transition:transform var(--normal) var(--spring),box-shadow .3s ease,background .3s ease;
+    }
+    .slot-icon svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+    .slot-title{font-size:15px;font-weight:760;letter-spacing:-.2px}
+    .slot-subtitle{font-size:11px;color:var(--muted);font-weight:630}
+    .slot-count{
+      margin-left:auto;
+      font-size:11px;color:var(--muted);font-weight:760;
+      padding:5px 8px;border-radius:999px;background:var(--surface-soft);border:1px solid var(--line)
+    }
+    .slot-section.is-current .slot-icon{
+      background:var(--accent);
+      color:white;
+      transform:scale(1.08);
+      box-shadow:0 0 0 7px rgba(95,143,138,.12),0 8px 22px rgba(95,143,138,.22);
+    }
+    .slot-section.is-current .slot-title{color:var(--accent-deep)}
+    .slot-section.is-done .slot-icon{
+      background:rgba(93,146,117,.14);
+      color:var(--success);
+    }
+    .slot-section.is-done .slot-icon::after{
+      content:"✓";font-size:11px;font-weight:900;position:absolute;
+    }
+    .slot-section.is-done .slot-icon svg{opacity:0}
+    .slot-morning .slot-title{color:var(--morning)}
+    .slot-afternoon .slot-title{color:var(--afternoon)}
+    .slot-evening .slot-title{color:var(--evening)}
+    .slot-night .slot-title{color:var(--night)}
+    .slot-section.is-current.slot-morning .slot-icon{background:var(--morning)}
+    .slot-section.is-current.slot-afternoon .slot-icon{background:var(--afternoon)}
+    .slot-section.is-current.slot-evening .slot-icon{background:var(--evening)}
+    .slot-section.is-current.slot-night .slot-icon{background:var(--night)}
 
-    /* ── All Clear Banner ── */
-    .all-clear {
-      background: linear-gradient(135deg, var(--teal), var(--teal-lt));
-      color: white; border-radius: var(--radius);
-      margin-bottom: 20px; display: none; overflow: hidden;
+    .med-card{
+      display:flex;align-items:center;gap:12px;
+      min-height:72px;
+      border-radius:20px;
+      padding:13px 14px;
+      margin-bottom:8px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-soft);
+      transition:transform var(--normal) var(--spring),opacity .28s ease,background .3s ease,border .3s ease;
+      overflow:hidden;
     }
-    .all-clear.show { display: block; }
-    .all-clear-top { padding: 22px; text-align: center; cursor: pointer; user-select: none; }
-    .ac-emoji { font-size: 34px; margin-bottom: 6px; }
-    .ac-title { font-size: 20px; font-weight: 800; }
-    .ac-sub   { font-size: 13.5px; opacity: 0.85; margin-top: 5px; }
-    .ac-hint  { font-size: 12px; opacity: 0.7; margin-top: 10px; }
-    .all-clear-body { display: none; background: rgba(0,0,0,0.15); padding: 12px; border-top: 1px solid rgba(255,255,255,0.2); }
-    .all-clear-body.open { display: block; }
-    .all-clear-body .med-card { background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); box-shadow: none; }
-    .all-clear-body .med-name { color: white; }
-    .all-clear-body .med-tag  { background: rgba(255,255,255,0.2); color: white; }
-    .all-clear-body .med-checkbox { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
-    .all-clear-body .med-checkbox.checked { background: white; border-color: white; }
-    .all-clear-body .med-checkbox.checked::after { color: var(--teal); }
-    .slot-title-ac { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.75); margin: 10px 4px 6px; }
+    .med-card:active{transform:scale(.988)}
+    .med-card.checked{opacity:.54;box-shadow:none;background:var(--surface-soft)}
+    .med-card.checked .med-name{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--muted)}
+    .med-checkbox{
+      width:30px;height:30px;flex:0 0 30px;
+      border-radius:12px;
+      border:1.6px solid var(--line-strong);
+      background:var(--surface-strong);
+      display:grid;place-items:center;
+      cursor:pointer;
+      transition:transform var(--normal) var(--spring),background var(--fast) ease,border var(--fast) ease;
+    }
+    .med-checkbox:active{transform:scale(.78)}
+    .med-checkbox.checked{background:var(--accent);border-color:var(--accent)}
+    .med-checkbox.checked::after{content:"✓";color:#fff;font-size:15px;font-weight:900;animation:checkPop .3s var(--spring)}
+    @keyframes checkPop{from{opacity:0;transform:scale(.3) rotate(-12deg)}to{opacity:1;transform:none}}
+    .med-info{min-width:0;flex:1}
+    .med-name{font-size:15.5px;font-weight:720;line-height:1.2;word-break:break-word}
+    .med-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+    .med-tag,.food-badge,.time-chip{
+      display:inline-flex;align-items:center;
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:10.5px;font-weight:720;
+      border:1px solid transparent;
+    }
+    .tag-before,.badge-before{background:rgba(226,161,58,.11);color:#9a671e;border-color:rgba(226,161,58,.14)}
+    .tag-after,.badge-after{background:rgba(93,146,117,.11);color:#4f7e64;border-color:rgba(93,146,117,.14)}
+    [data-theme="dark"] .tag-before,[data-theme="dark"] .badge-before{color:#eabf77}
+    [data-theme="dark"] .tag-after,[data-theme="dark"] .badge-after{color:#9bcbae}
 
-    /* ── Day Strip (Week View) ── */
-    .day-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; margin-bottom: 20px; }
-    .day-strip::-webkit-scrollbar { display: none; }
-    .day-btn { flex-shrink: 0; border: 2px solid var(--border); background: var(--surface); border-radius: 14px; padding: 8px 12px; cursor: pointer; text-align: center; transition: all 0.18s; min-width: 52px; }
-    .day-btn .day-name { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .day-btn .day-num  { font-size: 18px; font-weight: 800; color: var(--text); margin-top: 2px; }
-    .day-btn.active { background: var(--teal); border-color: var(--teal); }
-    .day-btn.active .day-name, .day-btn.active .day-num { color: white; }
-    .day-btn.today-dot { position: relative; }
-    .day-btn.today-dot::after { content: ''; width: 5px; height: 5px; background: var(--coral); border-radius: 50%; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); }
-    .day-btn.active.today-dot::after { background: rgba(255,255,255,0.8); }
+    .no-medicines{
+      padding:50px 20px;text-align:center;color:var(--muted);
+    }
+    .big-icon{
+      width:54px;height:54px;border-radius:22px;
+      margin:0 auto 14px;
+      display:grid;place-items:center;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-soft);
+      font-size:0;
+    }
+    .big-icon::after{
+      content:"";
+      width:22px;height:22px;border-radius:11px 11px 4px 4px;
+      border:2px solid currentColor;
+      transform:rotate(45deg);
+      opacity:.65;
+    }
+    .no-medicines p{font-size:13.5px;line-height:1.55;font-weight:610}
+    .no-medicines strong{color:var(--text)}
 
-    /* ── Slot Sections ── */
-    .slot-section { margin-bottom: 22px; }
-    .slot-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .slot-icon { width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-    .slot-title { font-size: 18px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; }
-    .slot-count { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--muted); }
-    .slot-morning   .slot-icon { background: var(--morning-bg); }
-    .slot-afternoon .slot-icon { background: var(--afternoon-bg); }
-    .slot-evening   .slot-icon { background: var(--evening-bg); }
-    .slot-night     .slot-icon { background: var(--night-bg); }
-    .slot-morning   .slot-title { color: var(--morning); }
-    .slot-afternoon .slot-title { color: var(--afternoon); }
-    .slot-evening   .slot-title { color: var(--evening); }
-    .slot-night     .slot-title { color: var(--night); }
+    /* Week */
+    .day-strip-wrap{
+      position:sticky;top:82px;z-index:45;
+      margin:0 -2px 18px;
+      padding:4px 0;
+    }
+    .day-strip{
+      display:flex;gap:4px;overflow:hidden;scrollbar-width:none;
+      padding:7px;
+      border-radius:24px;
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,.46);
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(20px) saturate(1.3);
+      -webkit-backdrop-filter:blur(20px) saturate(1.3);
+    }
+    .day-strip::-webkit-scrollbar{display:none}
+    .day-btn{
+      min-width:0;height:63px;flex:1 1 0;
+      border:0;border-radius:18px;background:transparent;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;cursor:pointer;
+      transition:transform var(--normal) var(--spring),background .2s ease;
+      position:relative;
+    }
+    .day-btn:active{transform:scale(.92)}
+    .day-name{font-size:10px;color:var(--muted);font-weight:720;text-transform:uppercase;letter-spacing:.05em}
+    .day-num{font-size:17px;font-weight:760}
+    .day-btn.active{background:var(--surface-strong);box-shadow:0 5px 14px rgba(46,65,72,.10)}
+    .day-btn.active .day-name{color:var(--accent-deep)}
+    .day-btn.today-dot::after{
+      content:"";position:absolute;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--accent)
+    }
+    .day-density{
+      display:flex;gap:2px;margin-top:1px;
+    }
+    .day-density span{width:3px;height:3px;border-radius:3px;background:var(--line-strong)}
+    .day-density span.on{background:var(--accent)}
 
-    /* ── Medicine Card ── */
-    .med-card { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; box-shadow: var(--shadow); transition: all 0.25s ease; }
-    .med-card.checked { opacity: 0.55; }
-    .med-card.checked .med-name { text-decoration: line-through; text-decoration-thickness: 2px; }
-    .med-checkbox { width: 26px; height: 26px; border-radius: 8px; border: 2.5px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: white; }
-    .med-checkbox.checked { background: var(--teal); border-color: var(--teal); }
-    .med-checkbox.checked::after { content: '✓'; color: white; font-size: 15px; font-weight: 900; }
-    .med-info { flex: 1; }
-    .med-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.2; }
-    .med-tags { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
-    .med-tag { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
-    .tag-before { background: #FEF3C7; color: #92400E; }
-    .tag-after  { background: #D1FAE5; color: #065F46; }
-    .tag-time   { background: var(--teal-pale); color: var(--teal); }
+    /* Medicines library */
+    .week-reset-info,.settings-note{
+      border-radius:18px;
+      padding:12px 14px;
+      font-size:12px;line-height:1.45;
+      color:var(--muted);font-weight:630;
+      background:var(--surface-soft);
+      border:1px solid var(--line);
+      margin-bottom:16px;
+    }
+    .meds-header{display:flex;align-items:flex-end;justify-content:space-between;margin:6px 2px 17px}
+    .meds-header h2{font-size:28px;letter-spacing:-.85px;font-weight:780}
+    .meds-count{font-size:12px;color:var(--muted);font-weight:680}
+    .med-plan-card{
+      border-radius:24px;
+      padding:17px;
+      margin-bottom:11px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-soft);
+      position:relative;
+      overflow:hidden;
+    }
+    .med-plan-card::before{
+      content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:.55
+    }
+    .med-plan-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .med-plan-name-row{display:flex;align-items:center;gap:9px;min-width:0}
+    .med-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px rgba(95,143,138,.09);flex:0 0 auto}
+    .med-plan-name{font-size:17px;font-weight:760;line-height:1.2;letter-spacing:-.25px;word-break:break-word}
+    .food-badge{white-space:nowrap;flex:0 0 auto}
+    .med-plan-meta{margin-top:14px;display:grid;gap:10px}
+    .meta-row{display:flex}
+    .meta-item{display:grid;gap:5px}
+    .meta-label{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:790}
+    .meta-value{font-size:12px;color:var(--muted);font-weight:650}
+    .time-chips{display:flex;gap:5px;flex-wrap:wrap}
+    .time-chip{background:var(--surface-soft);border-color:var(--line);color:var(--muted)}
+    .chip-morning{color:var(--morning)}
+    .chip-afternoon{color:var(--afternoon)}
+    .chip-evening{color:var(--evening)}
+    .chip-night{color:var(--night)}
+    .med-plan-actions{display:flex;gap:8px;margin-top:15px}
+    .btn-edit,.btn-delete{
+      border:0;height:42px;border-radius:15px;cursor:pointer;
+      transition:transform var(--fast) ease,background var(--fast) ease;
+    }
+    .btn-edit{
+      flex:1;background:var(--surface-soft);border:1px solid var(--line);
+      font-size:12px;font-weight:700;
+    }
+    .btn-delete{width:42px;background:var(--danger-soft);color:var(--danger);font-size:0}
+    .btn-delete::after{content:"×";font-size:21px;font-weight:560;line-height:1}
+    .btn-edit:active,.btn-delete:active{transform:scale(.95)}
+    .add-new-card{display:none}
 
-    /* ── No medicines ── */
-    .no-medicines { text-align: center; padding: 40px 20px; color: var(--muted); }
-    .no-medicines .big-icon { font-size: 48px; margin-bottom: 12px; }
-    .no-medicines p { font-size: 15px; font-weight: 600; line-height: 1.6; }
+    /* Settings */
+    .settings-header{padding:10px 2px 16px}
+    .settings-header h2{font-size:29px;letter-spacing:-.95px;font-weight:780}
+    .settings-header p{font-size:13px;color:var(--muted);font-weight:610;margin-top:5px;max-width:340px}
+    .time-setting-card{
+      border-radius:22px;
+      padding:15px 14px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:9px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-soft);
+    }
+    .time-setting-left{display:flex;align-items:center;gap:10px;min-width:0}
+    .time-setting-icon{
+      width:40px;height:40px;border-radius:16px;
+      display:grid;place-items:center;flex:0 0 auto;
+      background:var(--surface-soft);
+      border:1px solid var(--line);
+      color:var(--muted)
+    }
+    .time-setting-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
+    .time-setting-icon.morning{color:var(--morning)}
+    .time-setting-icon.afternoon{color:var(--afternoon)}
+    .time-setting-icon.evening{color:var(--evening)}
+    .time-setting-icon.night{color:var(--night)}
+    .time-setting-label{font-size:14.5px;font-weight:730}
+    .time-setting-sub{font-size:10.5px;color:var(--muted);font-weight:610;margin-top:2px}
+    .time-picker-group{display:flex;align-items:center;gap:3px;flex:0 0 auto}
+    .time-select{
+      height:38px;border-radius:13px;border:1px solid var(--line);
+      background:var(--surface-soft);
+      color:var(--text);
+      outline:none;
+      text-align:center;
+      font-size:12px;font-weight:720;
+      -webkit-appearance:none;appearance:none;
+      padding:0 5px;
+    }
+    .time-select.hr,.time-select.min{width:42px}
+    .time-select.ap{width:46px}
+    .time-colon{font-size:13px;color:var(--muted);font-weight:760}
 
-    /* ══════════════════════════════
-       ADD TAB
-    ══════════════════════════════ */
-    .add-view-header { margin-bottom: 22px; }
-    .add-view-header h2 { font-size: 24px; font-weight: 900; color: var(--text); }
-    .add-view-header p  { font-size: 14px; color: var(--muted); margin-top: 3px; font-weight: 600; }
-
-    .form-section { margin-bottom: 22px; }
-    .form-section-label {
-      font-size: 12px; font-weight: 800; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px;
-      display: block;
+    /* Add/edit fluid sheet */
+    .sheet-backdrop{
+      position:fixed;inset:0;z-index:140;
+      display:flex;align-items:flex-end;justify-content:center;
+      background:rgba(14,24,29,.18);
+      backdrop-filter:blur(5px);
+      -webkit-backdrop-filter:blur(5px);
+      opacity:0;pointer-events:none;
+      transition:opacity .28s ease;
+      padding-top:var(--safe-top);
     }
-
-    /* Name input */
-    .name-input-wrap { position: relative; }
-    .name-input-wrap input {
-      width: 100%; border: 2px solid var(--border); border-radius: 14px;
-      padding: 15px 50px 15px 18px;
-      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 600;
-      color: var(--text); background: var(--surface); outline: none; transition: border 0.2s;
+    .sheet-backdrop.open{opacity:1;pointer-events:auto}
+    .add-sheet{
+      width:min(100%,560px);
+      max-height:calc(100dvh - max(18px,var(--safe-top)));
+      overflow-y:auto;overscroll-behavior:contain;
+      border-radius:32px 32px 0 0;
+      padding:9px 16px calc(22px + var(--safe-bottom));
+      background:var(--glass-strong);
+      border:1px solid rgba(255,255,255,.48);
+      box-shadow:0 -22px 60px rgba(32,47,53,.18);
+      backdrop-filter:blur(32px) saturate(1.35);
+      -webkit-backdrop-filter:blur(32px) saturate(1.35);
+      transform:translateY(104%);
+      transition:transform .48s var(--spring);
     }
-    .name-input-wrap input:focus { border-color: var(--teal); }
-    .name-input-wrap input::placeholder { color: var(--muted); }
-    .name-input-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 20px; }
-
-    /* Time pill buttons */
-    .time-pill-group { display: flex; flex-wrap: wrap; gap: 10px; }
-    .time-pill {
-      flex: 1; min-width: calc(50% - 5px);
-      border: 2.5px solid var(--border); background: var(--surface);
-      border-radius: 50px; padding: 13px 10px;
-      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 700;
-      color: var(--muted); cursor: pointer; transition: all 0.18s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+    [data-theme="dark"] .add-sheet{border-color:rgba(255,255,255,.08)}
+    .sheet-backdrop.open .add-sheet{transform:none}
+    .sheet-grabber{width:42px;height:5px;border-radius:999px;background:var(--line-strong);margin:2px auto 12px}
+    .sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:4px 2px 18px}
+    .add-view-header{margin:0}
+    .add-view-header h2{font-size:27px;letter-spacing:-.85px;font-weight:780}
+    .add-view-header p{font-size:12.5px;color:var(--muted);font-weight:610;margin-top:4px}
+    .sheet-close{
+      width:36px;height:36px;border:0;border-radius:15px;
+      background:var(--surface-soft);border:1px solid var(--line);
+      display:grid;place-items:center;cursor:pointer;font-size:20px;color:var(--muted)
     }
-    .time-pill.selected { color: white; border-color: transparent; }
-    .time-pill[data-time="morning"].selected   { background: var(--morning); }
-    .time-pill[data-time="afternoon"].selected { background: var(--afternoon); }
-    .time-pill[data-time="evening"].selected   { background: var(--evening); }
-    .time-pill[data-time="night"].selected     { background: var(--night); }
-
-    /* Per-medicine dose times */
-    .dose-time-editors { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
-    .slot-time-editor {
-      background: var(--surface); border: 2px solid var(--border);
-      border-radius: 16px; padding: 14px;
+    .form-section{margin-bottom:17px}
+    .form-section-label{
+      display:block;margin:0 2px 8px;
+      font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:780
     }
-    .slot-time-editor-header {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 10px; margin-bottom: 10px;
+    .name-input-wrap{position:relative}
+    .name-input-wrap input{
+      width:100%;height:56px;border:1px solid var(--line);border-radius:19px;
+      background:var(--surface);color:var(--text);
+      padding:0 48px 0 15px;
+      font-size:16px;font-weight:650;outline:none;
+      box-shadow:var(--shadow-soft);
+      transition:border-color .2s ease,box-shadow .2s ease;
     }
-    .slot-time-editor-title { font-size: 16px; font-weight: 800; color: var(--text); }
-    .slot-time-editor-sub { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 2px; }
-    .dose-time-row {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--bg); border-radius: 13px; padding: 10px 10px 10px 12px;
-      margin-top: 8px; min-height: 62px;
-    }
-    .dose-time-copy { flex: 1; min-width: 0; }
-    .dose-time-mode { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
-    .dose-time-value { font-size: 17px; font-weight: 800; color: var(--text); margin-top: 2px; }
-    .dose-time-input {
-      width: 126px; border: 2px solid var(--border); border-radius: 11px;
-      padding: 10px 8px; background: var(--surface); color: var(--text);
-      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
-      outline: none;
-    }
-    .dose-time-input:focus { border-color: var(--teal); }
-    .dose-time-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .btn-time-small {
-      min-height: 42px; border: none; border-radius: 11px; padding: 0 12px;
-      background: var(--teal-pale); color: var(--teal);
-      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
-      cursor: pointer;
-    }
-    .btn-time-remove {
-      width: 42px; min-width: 42px; padding: 0;
-      background: var(--coral-lt); color: var(--coral); font-size: 18px;
-    }
-    .btn-add-time {
-      width: 100%; border: 2px dashed var(--border); border-radius: 12px;
-      padding: 11px; margin-top: 10px; background: transparent;
-      color: var(--teal); font-family: 'Nunito', sans-serif;
-      font-size: 14px; font-weight: 800; cursor: pointer;
-    }
-    .field-helper { font-size: 12px; line-height: 1.45; font-weight: 650; color: var(--muted); margin-top: 8px; }
-
-    /* Day picker */
-    .day-picker-row { display: flex; gap: 6px; justify-content: space-between; margin-bottom: 10px; }
-    .day-circle {
-      width: 42px; height: 42px; border-radius: 50%;
-      border: 2.5px solid var(--border); background: var(--surface);
-      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
-      color: var(--muted); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.18s; flex-shrink: 0;
-    }
-    .day-circle.selected { background: var(--teal); border-color: var(--teal); color: white; }
-    .all-days-btn {
-      width: 100%; border: 2.5px solid var(--border); background: var(--surface);
-      border-radius: 50px; padding: 11px;
-      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
-      color: var(--muted); cursor: pointer; transition: all 0.18s;
-    }
-    .all-days-btn.selected { background: var(--teal-pale); border-color: var(--teal); color: var(--teal); }
-
-    /* Course start and duration */
-    .start-mode-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .start-mode-btn {
-      min-height: 50px; border: 2.5px solid var(--border); border-radius: 14px;
-      background: var(--surface); color: var(--muted);
-      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800;
-      cursor: pointer;
-    }
-    .start-mode-btn.selected { border-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
-    .start-date-wrap { display: none; margin-top: 10px; }
-    .start-date-wrap.show { display: block; }
-    .start-date-input {
-      width: 100%; min-height: 52px; border: 2px solid var(--border); border-radius: 14px;
-      padding: 10px 14px; background: var(--surface); color: var(--text);
-      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 750;
-      outline: none;
-    }
-    .start-date-input:focus { border-color: var(--teal); }
-    .duration-row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 10px; }
-    .duration-select { position: relative; }
-    .duration-select-trigger {
-      width: 100%; min-height: 52px; border: 2px solid var(--border); border-radius: 14px;
-      padding: 0 14px; background: var(--surface); color: var(--text);
-      display: flex; align-items: center; justify-content: space-between;
-      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
-      cursor: pointer;
-    }
-    .duration-select-trigger.open { border-color: var(--teal); }
-    .duration-chevron { color: var(--muted); transition: transform 0.18s; }
-    .duration-select-trigger.open .duration-chevron { transform: rotate(180deg); }
-    .duration-menu {
-      display: none; position: absolute; left: 0; right: 0; top: calc(100% + 6px);
-      background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px;
-      padding: 6px; box-shadow: 0 12px 30px rgba(0,0,0,0.16); z-index: 500;
-    }
-    .duration-menu.open { display: block; }
-    .duration-option {
-      width: 100%; min-height: 44px; border: none; border-radius: 10px;
-      background: transparent; color: var(--text); text-align: left; padding: 0 12px;
-      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 750; cursor: pointer;
-    }
-    .duration-option.selected { background: var(--teal-pale); color: var(--teal); }
-    .duration-number {
-      width: 100%; min-height: 52px; border: 2px solid var(--border); border-radius: 14px;
-      padding: 0 14px; background: var(--surface); color: var(--text);
-      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
-      outline: none;
-    }
-    .duration-number:focus { border-color: var(--teal); }
-    .duration-number:disabled { opacity: 0.48; background: var(--bg); }
-
-    /* Food options */
-    .food-option {
-      border: 2.5px solid var(--border); background: var(--surface);
-      border-radius: 16px; padding: 16px 18px;
-      display: flex; align-items: center; gap: 14px;
-      margin-bottom: 10px; cursor: pointer; transition: all 0.18s;
-    }
-    .food-option:last-child { margin-bottom: 0; }
-    .food-option.selected { border-color: var(--teal); background: var(--teal-pale); }
-    .food-icon { font-size: 22px; width: 32px; text-align: center; }
-    .food-label { font-size: 18px; font-weight: 700; flex: 1; color: var(--text); }
-    .food-radio { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.18s; flex-shrink: 0; }
-    .food-option.selected .food-radio { border-color: var(--teal); }
-    .food-option.selected .food-radio::after { content: ''; width: 12px; height: 12px; background: var(--teal); border-radius: 50%; display: block; }
-
-    /* Submit button */
-    .btn-submit {
-      width: 100%; background: var(--teal); color: white; border: none;
-      border-radius: 16px; padding: 16px;
-      font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
-      cursor: pointer; transition: background 0.2s; letter-spacing: 0.3px;
-      margin-top: 4px;
-    }
-    .btn-submit:hover { background: var(--teal-lt); }
-    .btn-submit:active { transform: scale(0.98); }
-
-    /* ══════════════════════════════
-       MEDS TAB
-    ══════════════════════════════ */
-    .meds-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
-    .meds-header h2 { font-size: 22px; font-weight: 900; }
-    .meds-count { font-size: 14px; font-weight: 700; color: var(--teal); }
-
-    .med-plan-card { background: var(--surface); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
-    .med-plan-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
-    .med-plan-badges { display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
-    .med-plan-name-row { display: flex; align-items: center; gap: 8px; }
-    .med-dot { width: 10px; height: 10px; background: var(--teal); border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
-    .med-plan-name { font-size: 19px; font-weight: 800; color: var(--text); }
-    .food-badge { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; white-space: nowrap; }
-    .badge-before { background: #FEF3C7; color: #92400E; }
-    .badge-after  { background: #D1FAE5; color: #065F46; }
-
-    .med-plan-meta { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-    .meta-row { display: flex; gap: 20px; }
-    .meta-item { display: flex; flex-direction: column; gap: 2px; }
-    .meta-label { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
-    .meta-value { font-size: 14px; font-weight: 700; color: var(--text); }
-    .course-status { font-size: 11px; font-weight: 850; padding: 4px 9px; border-radius: 20px; white-space: nowrap; }
-    .status-active { color: #065F46; background: #D1FAE5; }
-    .status-upcoming { color: #075985; background: #E0F2FE; }
-    .status-completed { color: #7C2D12; background: #FFEDD5; }
-    .course-summary { display: flex; flex-wrap: wrap; gap: 5px 10px; }
-    .course-summary .meta-value { line-height: 1.45; }
-    .time-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-    .time-chip { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-    .chip-morning   { background: var(--morning-bg);   color: var(--morning); }
-    .chip-afternoon { background: var(--afternoon-bg); color: var(--afternoon); }
-    .chip-evening   { background: var(--evening-bg);   color: var(--evening); }
-    .chip-night     { background: var(--night-bg);     color: var(--night); }
-
-    .med-plan-actions { display: flex; gap: 10px; }
-    .btn-edit {
-      flex: 1; background: var(--bg); border: none; border-radius: 12px; padding: 12px;
-      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; color: var(--text);
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-      transition: background 0.2s;
-    }
-    .btn-edit:hover { background: var(--border); }
-    .btn-delete {
-      width: 46px; height: 46px; background: var(--coral-lt); border: none; border-radius: 12px;
-      color: var(--coral); font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      transition: background 0.2s;
-    }
-    .btn-delete:hover { background: #fad5c8; }
-
-    .add-new-card {
-      border: 2px dashed var(--border); border-radius: var(--radius);
-      padding: 28px 20px; text-align: center; cursor: pointer;
-      transition: all 0.2s; margin-top: 4px;
-    }
-    .add-new-card:hover { border-color: var(--teal); background: var(--teal-pale); }
-    .add-new-card .anc-icon { font-size: 32px; margin-bottom: 8px; }
-    .add-new-card h3 { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
-    .add-new-card p  { font-size: 13px; color: var(--muted); font-weight: 600; }
-
-    /* ── Week reset info ── */
-    .week-reset-info { background: var(--teal-pale); border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--teal); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-
-    /* ── Toast ── */
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: white; border-radius: 24px; padding: 10px 22px; font-size: 14px; font-weight: 700; white-space: nowrap; opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none; }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* ══════════════════════════════
-       SETTINGS TAB
-    ══════════════════════════════ */
-    .settings-header { margin-bottom: 22px; }
-    .settings-header h2 { font-size: 24px; font-weight: 900; color: var(--text); }
-    .settings-header p  { font-size: 14px; color: var(--muted); margin-top: 3px; font-weight: 600; }
-
-    .notification-status-card {
-      background: var(--surface); border: 2px solid var(--border);
-      border-radius: var(--radius); padding: 16px 18px;
-      display: flex; align-items: center; gap: 13px;
-      margin-bottom: 18px; box-shadow: var(--shadow);
-    }
-    .notification-status-card.enabled { border-color: #A7DCC7; }
-    .notification-status-card.blocked { border-color: #F4C38F; background: #FFF9F2; }
-    .notification-status-dot {
-      width: 13px; height: 13px; border-radius: 50%;
-      background: var(--muted); flex-shrink: 0;
-    }
-    .notification-status-card.enabled .notification-status-dot { background: #17845D; }
-    .notification-status-card.blocked .notification-status-dot { background: #C45F00; }
-    .notification-status-copy { flex: 1; min-width: 0; }
-    .notification-status-title { font-size: 16px; font-weight: 900; color: var(--text); }
-    .notification-status-text { font-size: 13px; font-weight: 700; line-height: 1.4; color: var(--muted); margin-top: 2px; }
-    .notification-status-button {
-      display: none; min-height: 44px; border: none; border-radius: 12px;
-      padding: 0 13px; background: var(--teal); color: white;
-      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 900;
-      cursor: pointer; flex-shrink: 0;
-    }
-    .notification-status-card.blocked .notification-status-button { display: block; }
-
-    .time-setting-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 16px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      box-shadow: var(--shadow);
-    }
-    .time-setting-left { display: flex; align-items: center; gap: 12px; }
-    .time-setting-icon {
-      width: 40px; height: 40px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
-    }
-    .time-setting-icon.morning   { background: var(--morning-bg); }
-    .time-setting-icon.afternoon { background: var(--afternoon-bg); }
-    .time-setting-icon.evening   { background: var(--evening-bg); }
-    .time-setting-icon.night     { background: var(--night-bg); }
-    .time-setting-label { font-size: 16px; font-weight: 700; color: var(--text); }
-    .time-setting-sub   { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 1px; }
-
-    .time-picker-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .time-select {
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 4px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--teal);
-      background: var(--surface);
-      outline: none;
-      cursor: pointer;
-      text-align: center;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-    .time-select:focus { border-color: var(--teal); }
-    .time-select.hr  { width: 52px; }
-    .time-select.min { width: 52px; }
-    .time-select.ap  { width: 58px; }
-    .time-colon {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--muted);
+    .name-input-wrap input:focus{border-color:rgba(95,143,138,.42);box-shadow:0 0 0 4px rgba(95,143,138,.09)}
+    .name-input-wrap input::placeholder{color:var(--faint)}
+    .name-input-icon{display:none}
+    .name-input-wrap::after{
+      content:"";
+      position:absolute;right:17px;top:18px;width:18px;height:18px;
+      border:1.8px solid var(--muted);border-radius:9px 9px 4px 4px;transform:rotate(45deg);opacity:.55;
     }
 
-    .settings-note {
-      background: var(--teal-pale);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--teal);
-      margin-top: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      line-height: 1.5;
+    .time-pill-group{
+      display:grid;grid-template-columns:1fr 1fr;gap:8px;
+    }
+    .time-pill{
+      min-height:48px;border:1px solid var(--line);border-radius:17px;
+      background:var(--surface);color:var(--muted);
+      font-size:13px;font-weight:710;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      cursor:pointer;
+      transition:transform var(--normal) var(--spring),background .2s ease,color .2s ease,border .2s ease;
+      position:relative;overflow:hidden;
+    }
+    .time-pill:active{transform:scale(.96)}
+    .time-pill.selected{color:#fff;border-color:transparent;box-shadow:0 8px 22px rgba(63,89,91,.13)}
+    .time-pill[data-time="morning"].selected{background:var(--morning)}
+    .time-pill[data-time="afternoon"].selected{background:var(--afternoon)}
+    .time-pill[data-time="evening"].selected{background:var(--evening)}
+    .time-pill[data-time="night"].selected{background:var(--night)}
+    .time-pill .mini-icon{width:15px;height:15px}
+    .time-pill .mini-icon svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+    .day-picker-row{
+      display:grid;grid-template-columns:repeat(7,1fr);gap:5px;
+      background:var(--surface-soft);
+      padding:6px;border:1px solid var(--line);border-radius:19px;
+    }
+    .day-circle{
+      width:100%;aspect-ratio:1;border:0;border-radius:14px;
+      background:transparent;color:var(--muted);
+      font-size:11px;font-weight:760;cursor:pointer;
+      transition:transform var(--normal) var(--spring),background .2s ease,color .2s ease;
+    }
+    .day-circle:active{transform:scale(.9)}
+    .day-circle.selected{background:var(--surface-strong);color:var(--accent-deep);box-shadow:0 4px 12px rgba(44,63,70,.09)}
+    .all-days-btn{
+      width:100%;margin-top:7px;min-height:40px;border-radius:15px;
+      border:1px solid var(--line);background:var(--surface-soft);color:var(--muted);
+      font-size:11.5px;font-weight:700;cursor:pointer;
+    }
+    .all-days-btn.selected{background:var(--accent-soft);color:var(--accent-deep);border-color:rgba(95,143,138,.16)}
+
+    .food-option{
+      display:flex;align-items:center;gap:11px;
+      min-height:54px;padding:0 14px;margin-bottom:8px;
+      border-radius:18px;border:1px solid var(--line);
+      background:var(--surface);cursor:pointer;
+      transition:transform var(--normal) var(--spring),background .2s ease,border .2s ease;
+    }
+    .food-option:active{transform:scale(.985)}
+    .food-option.selected{border-color:rgba(95,143,138,.26);background:var(--accent-soft)}
+    .food-icon{font-size:0;width:22px;height:22px;position:relative;flex:0 0 auto;color:var(--muted)}
+    .food-option:first-of-type .food-icon::before{
+      content:"";position:absolute;left:1px;top:3px;width:18px;height:12px;border:1.6px solid currentColor;border-radius:3px 3px 9px 9px
+    }
+    .food-option:last-of-type .food-icon::before{
+      content:"";position:absolute;left:7px;top:1px;width:8px;height:18px;border:1.6px solid currentColor;border-radius:8px
+    }
+    .food-label{font-size:14px;font-weight:690;flex:1}
+    .food-radio{
+      width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-strong);
+      display:grid;place-items:center;
+    }
+    .food-option.selected .food-radio{border-color:var(--accent)}
+    .food-option.selected .food-radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent);animation:checkPop .3s var(--spring)}
+
+    .btn-submit{
+      position:sticky;bottom:calc(8px + var(--safe-bottom));
+      width:100%;height:54px;border:0;border-radius:19px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+      color:#fff;font-size:14px;font-weight:760;
+      box-shadow:0 14px 30px rgba(62,112,108,.22);
+      cursor:pointer;
+      transition:transform var(--fast) ease,filter .2s ease;
+      margin-top:4px;
+    }
+    .btn-submit:active{transform:scale(.98)}
+
+    /* Floating bottom dock */
+    .bottom-nav-wrap{
+      position:fixed;
+      left:50%;bottom:calc(10px + var(--safe-bottom));
+      width:min(calc(100% - 24px),536px);
+      transform:translateX(-50%);
+      z-index:100;
+      pointer-events:none;
+    }
+    .bottom-nav{
+      position:relative;height:72px;border-radius:27px;
+      display:grid;grid-template-columns:1fr 1fr 62px 1fr 1fr;
+      align-items:center;padding:6px 7px;
+      pointer-events:auto;
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,.52);
+      box-shadow:0 16px 42px rgba(37,55,62,.18);
+      backdrop-filter:blur(28px) saturate(1.45);
+      -webkit-backdrop-filter:blur(28px) saturate(1.45);
+    }
+    [data-theme="dark"] .bottom-nav{border-color:rgba(255,255,255,.09)}
+    .nav-lens{
+      position:absolute;top:7px;height:58px;border-radius:20px;
+      background:rgba(255,255,255,.52);
+      border:1px solid rgba(255,255,255,.50);
+      box-shadow:0 6px 18px rgba(55,75,81,.10);
+      transition:left .42s var(--spring),width .42s var(--spring),opacity .2s ease;
+      pointer-events:none;
+    }
+    [data-theme="dark"] .nav-lens{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.08)}
+    .nav-btn{
+      height:58px;border:0;border-radius:20px;background:transparent;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+      color:var(--muted);cursor:pointer;position:relative;z-index:2;
+      min-width:0;
+    }
+    .nav-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.75;transition:transform .3s var(--spring)}
+    .nav-btn span{font-size:9.5px;font-weight:720;white-space:nowrap}
+    .nav-btn.active{color:var(--accent-deep)}
+    .nav-btn.active svg{transform:translateY(-1px) scale(1.06)}
+    .nav-btn:active{transform:scale(.94)}
+    .fab{
+      width:58px;height:58px;border:0;border-radius:22px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+      color:#fff;
+      box-shadow:0 12px 26px rgba(62,112,108,.32);
+      cursor:pointer;z-index:4;
+      transform:translateY(-16px);
+      transition:transform .35s var(--spring),box-shadow .3s ease;
+    }
+    .fab::before,.fab::after{
+      content:"";position:absolute;width:18px;height:2px;border-radius:2px;background:currentColor
+    }
+    .fab::after{transform:rotate(90deg)}
+    .fab:active{transform:translateY(-16px) scale(.88)}
+    .fab.editing{transform:translateY(-16px) rotate(45deg)}
+
+    /* Toast */
+    .toast{
+      position:fixed;left:50%;bottom:calc(96px + var(--safe-bottom));
+      transform:translate(-50%,16px) scale(.96);
+      z-index:220;opacity:0;pointer-events:none;
+      max-width:calc(100% - 32px);
+      padding:11px 16px;border-radius:999px;
+      color:var(--text);background:var(--glass-strong);
+      border:1px solid rgba(255,255,255,.44);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      font-size:12px;font-weight:690;text-align:center;
+      transition:opacity .24s ease,transform .32s var(--spring);
+    }
+    .toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
+
+    /* small-screen hardening */
+    @media(max-width:390px){
+      main{padding-left:12px;padding-right:12px}
+      .topbar-wrap{padding-left:10px;padding-right:10px}
+      .date-pill{display:none}
+      .week-label{max-width:210px}
+      .time-setting-card{padding:13px 12px}
+      .time-setting-left{gap:8px}
+      .time-setting-icon{width:36px;height:36px;border-radius:14px}
+      .time-select.hr,.time-select.min{width:39px}
+      .time-select.ap{width:44px}
+      .time-picker-group{gap:2px}
+      .bottom-nav-wrap{width:calc(100% - 16px)}
+      .nav-btn span{font-size:9px}
+      .slot-section{padding-left:31px}
+      .slot-icon{left:-31px}
+    }
+    @media(min-width:561px){
+      body{background:#e8edef}
+      [data-theme="dark"] body{background:#081014}
+      .ambient{left:50%;width:560px;transform:translateX(-50%)}
     }
 
-    @media (max-width: 380px) {
-      .dose-time-row { align-items: flex-start; flex-wrap: wrap; }
-      .dose-time-copy { flex-basis: calc(100% - 52px); }
-      .dose-time-actions { margin-left: auto; }
-      .duration-row { grid-template-columns: 1fr; }
-      .notification-warning, .notification-status-card { align-items: flex-start; flex-wrap: wrap; }
-      .notification-warning-button, .notification-status-button { margin-left: 38px; }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms!important;
+        animation-iteration-count:1!important;
+        scroll-behavior:auto!important;
+        transition-duration:.001ms!important
+      }
     }
+
+    /* ═══════════════════════════════════════════════════════
+       LIQUID GLASS + ELDERLY-FIRST TYPOGRAPHY — FINAL LAYER
+       Keeps content surfaces legible; glass is concentrated in chrome.
+    ═══════════════════════════════════════════════════════ */
+    :root{
+      --glass:rgba(255,255,255,.12);
+      --glass-strong:rgba(255,255,255,.25);
+      --liquid-edge:rgba(255,255,255,.72);
+      --liquid-edge-soft:rgba(255,255,255,.34);
+      --liquid-shadow:0 18px 52px rgba(35,54,62,.15), inset 0 1px 0 rgba(255,255,255,.78), inset 0 -1px 0 rgba(255,255,255,.20);
+    }
+    [data-theme="dark"]{
+      --glass:rgba(22,32,39,.14);
+      --glass-strong:rgba(25,36,43,.24);
+      --liquid-edge:rgba(255,255,255,.19);
+      --liquid-edge-soft:rgba(255,255,255,.08);
+      --liquid-shadow:0 20px 56px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(255,255,255,.035);
+    }
+
+    body{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Noto Sans Bengali",Roboto,Arial,sans-serif;
+      font-size:17px;
+      line-height:1.42;
+      letter-spacing:-.01em;
+    }
+
+    /* True glass layer: translucent, actively blurred, specular, and adaptive. */
+    .glass,
+    .bottom-nav,
+    .day-strip,
+    .add-sheet,
+    .toast{
+      position:relative;
+      isolation:isolate;
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.055) 42%,rgba(255,255,255,.10) 100%),
+        var(--glass);
+      border:1px solid var(--liquid-edge);
+      box-shadow:var(--liquid-shadow);
+      backdrop-filter:blur(30px) saturate(1.9) brightness(1.055);
+      -webkit-backdrop-filter:blur(30px) saturate(1.9) brightness(1.055);
+    }
+    [data-theme="dark"] .glass,
+    [data-theme="dark"] .bottom-nav,
+    [data-theme="dark"] .day-strip,
+    [data-theme="dark"] .add-sheet,
+    [data-theme="dark"] .toast{
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.105) 0%,rgba(255,255,255,.025) 44%,rgba(255,255,255,.055) 100%),
+        var(--glass);
+      border-color:var(--liquid-edge);
+      backdrop-filter:blur(32px) saturate(1.75) brightness(.95);
+      -webkit-backdrop-filter:blur(32px) saturate(1.75) brightness(.95);
+    }
+
+    .glass::before,
+    .bottom-nav::before,
+    .day-strip::before,
+    .add-sheet::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      pointer-events:none;
+      z-index:-1;
+      background:
+        radial-gradient(110% 82% at 18% -12%,rgba(255,255,255,.76) 0%,rgba(255,255,255,.16) 37%,transparent 62%),
+        radial-gradient(70% 90% at 3% 72%,rgba(112,185,180,.16),transparent 62%),
+        radial-gradient(70% 90% at 96% 22%,rgba(226,173,112,.10),transparent 64%),
+        linear-gradient(112deg,transparent 12%,rgba(255,255,255,.18) 38%,rgba(255,255,255,.02) 55%,transparent 72%);
+      opacity:.72;
+    }
+    [data-theme="dark"] .glass::before,
+    [data-theme="dark"] .bottom-nav::before,
+    [data-theme="dark"] .day-strip::before,
+    [data-theme="dark"] .add-sheet::before{opacity:.26}
+
+    .glass::after,
+    .bottom-nav::after,
+    .day-strip::after,
+    .add-sheet::after{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      pointer-events:none;
+      z-index:-1;
+      box-shadow:
+        inset 0 0 0 .5px rgba(255,255,255,.38),
+        inset 0 10px 18px rgba(255,255,255,.055),
+        inset 0 -12px 22px rgba(48,74,82,.035);
+    }
+
+    /* Keep content above the optical layer. */
+    .glass > *, .bottom-nav > *:not(.nav-lens), .day-strip > *, .add-sheet > *{position:relative;z-index:1}
+    .nav-lens{position:absolute!important;z-index:0}
+
+    .topbar-wrap{padding:calc(14px + var(--safe-top)) 14px 10px}
+    .topbar{min-height:72px;border-radius:29px;padding:12px 13px 12px 20px}
+    .app-name{font-size:25px;line-height:1.05;font-weight:740;letter-spacing:-.65px}
+    .week-label{margin-top:6px;font-size:14.5px;line-height:1.25;font-weight:610;max-width:300px}
+    .date-pill{min-height:44px;padding:0 14px;border-radius:18px;font-size:14px;font-weight:680;background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.32);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+    [data-theme="dark"] .date-pill{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.09)}
+    .icon-btn{width:46px;height:46px;border-radius:19px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+    [data-theme="dark"] .icon-btn{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.09)}
+    .icon-btn svg{width:22px;height:22px;stroke-width:1.9}
+
+    main{padding:16px 18px 0}
+    .page-heading{padding:15px 3px 22px;align-items:center}
+    .page-heading.simple-heading{padding-top:16px}
+    .page-heading h1,.page-heading h2{margin:0;font-size:36px;line-height:1.04;letter-spacing:-1.2px;font-weight:735}
+    .eyebrow{display:none}
+    .page-meta{font-size:15px;font-weight:650;padding:0;color:var(--muted)}
+
+    .progress-card{padding:23px 22px 20px;margin-bottom:26px;border-radius:30px}
+    .pc-day{font-size:13px;line-height:1.3;font-weight:700;letter-spacing:.045em}
+    .pc-main{margin-top:11px;font-size:37px;line-height:1.04;font-weight:740;letter-spacing:-1px}
+    .pc-sub{margin-top:8px;font-size:16.5px;line-height:1.4;font-weight:590}
+    .pc-bar-wrap{height:10px;margin-top:20px}
+    .pc-completed{margin-top:11px;font-size:13px;font-weight:680;letter-spacing:.035em}
+
+    .all-clear-top{padding:24px 22px}
+    .all-clear-top::before{width:50px;height:50px;border-radius:20px;font-size:24px;margin-bottom:15px}
+    .ac-title{font-size:26px;line-height:1.15;font-weight:720}
+    .ac-sub{display:none}
+    .ac-hint{font-size:15px;margin-top:12px;font-weight:650}
+    .slot-title-ac{font-size:13px;font-weight:700}
+
+    .slot-section{padding-left:41px;margin-bottom:29px}
+    .slot-section::before{left:16px;top:36px;bottom:-31px}
+    .slot-header{min-height:36px;gap:11px;margin-bottom:12px}
+    .slot-icon{left:-41px;width:34px;height:34px}
+    .slot-icon svg{width:17px;height:17px}
+    .slot-title{font-size:19px;line-height:1.2;font-weight:710;letter-spacing:-.25px}
+    .slot-subtitle{font-size:14px;line-height:1.25;font-weight:560}
+    .slot-count{font-size:13px;font-weight:690;padding:6px 10px}
+
+    .med-card{min-height:84px;border-radius:23px;padding:16px 17px;gap:14px;margin-bottom:10px}
+    .med-checkbox{width:36px;height:36px;flex-basis:36px;border-radius:14px}
+    .med-checkbox.checked::after{font-size:18px}
+    .med-name{font-size:19px;line-height:1.28;font-weight:680;letter-spacing:-.15px}
+    .med-tags{margin-top:8px;gap:7px}
+    .med-tag,.food-badge,.time-chip{padding:5px 10px;font-size:13.5px;line-height:1.25;font-weight:650}
+    .no-medicines{padding:56px 22px}
+    .no-medicines p{font-size:17px;line-height:1.5;font-weight:570}
+
+    .day-strip-wrap{top:96px;margin-bottom:22px}
+    .day-strip{gap:5px;padding:8px;border-radius:26px}
+    .day-btn{height:72px;border-radius:20px;gap:4px}
+    .day-name{font-size:12px;font-weight:680;letter-spacing:.035em}
+    .day-num{font-size:21px;font-weight:710}
+    .day-density span{width:4px;height:4px}
+
+    .meds-header{margin:14px 3px 22px}
+    .meds-header h2{font-size:36px;line-height:1.05;letter-spacing:-1.05px;font-weight:735}
+    .meds-count{font-size:15px;font-weight:620}
+    .med-plan-card{border-radius:27px;padding:21px;margin-bottom:14px}
+    .med-plan-name-row{gap:11px}
+    .med-dot{width:10px;height:10px}
+    .med-plan-name{font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-.35px}
+    .food-badge{font-size:14px;padding:6px 11px}
+    .med-plan-meta{margin-top:18px;gap:14px}
+    .meta-item{gap:7px}
+    .meta-label{font-size:12px;letter-spacing:.065em;font-weight:700}
+    .meta-value{font-size:16px;line-height:1.35;font-weight:600}
+    .time-chip{font-size:14px;padding:6px 11px}
+    .med-plan-actions{gap:10px;margin-top:19px}
+    .btn-edit,.btn-delete{height:52px;border-radius:18px}
+    .btn-edit{font-size:16px;font-weight:650}
+    .btn-delete{width:52px}
+    .btn-delete::after{font-size:28px;font-weight:430}
+
+    .settings-header{padding:16px 3px 24px}
+    .settings-header h2{font-size:36px;line-height:1.05;letter-spacing:-1.1px;font-weight:735}
+    .settings-header p,.week-reset-info,.settings-note{display:none!important}
+    .time-setting-card{min-height:88px;border-radius:27px;padding:16px 16px;margin-bottom:12px;gap:10px}
+    .time-setting-left{gap:12px}
+    .time-setting-icon{width:48px;height:48px;border-radius:19px}
+    .time-setting-icon svg{width:22px;height:22px}
+    .time-setting-label{font-size:20px;line-height:1.15;font-weight:690}
+    .time-setting-sub{font-size:14px;line-height:1.2;font-weight:560;margin-top:4px}
+    .time-picker-group{gap:4px}
+    .time-select{height:50px;border-radius:17px;font-size:16px;font-weight:670;padding:0 6px}
+    .time-select.hr,.time-select.min{width:50px}
+    .time-select.ap{width:56px}
+    .time-colon{font-size:17px;font-weight:650}
+
+    /* Elderly-first form controls */
+    .add-sheet{border-radius:34px 34px 0 0;padding:10px 18px calc(24px + var(--safe-bottom));background:linear-gradient(145deg,rgba(255,255,255,.48),rgba(255,255,255,.22)),var(--glass-strong)}
+    [data-theme="dark"] .add-sheet{background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.025)),var(--glass-strong)}
+    .sheet-grabber{width:50px;height:6px;margin:3px auto 15px}
+    .sheet-head{padding:5px 2px 22px;align-items:center}
+    .add-view-header h2{font-size:34px;line-height:1.08;letter-spacing:-1px;font-weight:735}
+    .add-view-header p{display:none}
+    .sheet-close{width:46px;height:46px;border-radius:18px;font-size:25px}
+    .form-section{margin-bottom:22px}
+    .form-section-label{margin:0 3px 10px;font-size:13px;letter-spacing:.055em;font-weight:690}
+    .name-input-wrap input{height:64px;border-radius:21px;padding:0 50px 0 18px;font-size:18px;font-weight:590}
+    .name-input-wrap::after{top:21px}
+    .time-pill-group{gap:10px}
+    .time-pill{min-height:58px;border-radius:20px;font-size:16px;font-weight:640}
+    .time-pill .mini-icon,.time-pill .mini-icon svg{width:18px;height:18px}
+    .day-picker-row{gap:6px;padding:7px;border-radius:22px}
+    .day-circle{border-radius:16px;font-size:14px;font-weight:690;min-height:42px;aspect-ratio:1}
+    .all-days-btn{min-height:48px;border-radius:17px;font-size:15px;font-weight:620;margin-top:9px}
+    .food-option{min-height:64px;border-radius:21px;padding:0 17px;gap:14px;margin-bottom:10px}
+    .food-icon{width:26px;height:26px}
+    .food-label{font-size:18px;font-weight:620}
+    .food-radio{width:26px;height:26px}
+    .food-option.selected .food-radio::after{width:12px;height:12px}
+    .btn-submit{height:62px;border-radius:21px;font-size:18px;font-weight:680}
+
+    /* Liquid glass dock: visibly transparent with a brighter moving lens. */
+    .app-shell{padding-bottom:calc(132px + var(--safe-bottom))}
+    .bottom-nav-wrap{bottom:calc(12px + var(--safe-bottom));width:min(calc(100% - 22px),538px)}
+    .bottom-nav{height:82px;border-radius:31px;grid-template-columns:1fr 1fr 70px 1fr 1fr;padding:7px 8px;background:linear-gradient(145deg,rgba(255,255,255,.20),rgba(255,255,255,.045) 48%,rgba(255,255,255,.09)),var(--glass)}
+    [data-theme="dark"] .bottom-nav{background:linear-gradient(145deg,rgba(255,255,255,.085),rgba(255,255,255,.018) 48%,rgba(255,255,255,.045)),var(--glass)}
+    .nav-lens{top:7px;height:68px;border-radius:23px;background:linear-gradient(145deg,rgba(255,255,255,.48),rgba(255,255,255,.12));border:1px solid rgba(255,255,255,.67);box-shadow:0 8px 24px rgba(42,66,74,.11),inset 0 1px 0 rgba(255,255,255,.82),inset 0 -1px 0 rgba(255,255,255,.15);backdrop-filter:blur(18px) saturate(2.05);-webkit-backdrop-filter:blur(18px) saturate(2.05)}
+    [data-theme="dark"] .nav-lens{background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.035));border-color:rgba(255,255,255,.16);box-shadow:0 10px 26px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.18)}
+    .nav-btn{height:68px;border-radius:23px;gap:5px}
+    .nav-btn svg{width:23px;height:23px;stroke-width:1.8}
+    .nav-btn span{font-size:12px;line-height:1;font-weight:650}
+    .fab{width:66px;height:66px;border-radius:25px;transform:translateY(-18px);background:linear-gradient(145deg,rgba(122,190,184,.88),rgba(72,132,127,.68));border:1px solid rgba(255,255,255,.58);box-shadow:0 16px 34px rgba(61,111,107,.30),inset 0 1px 0 rgba(255,255,255,.72),inset 0 -1px 0 rgba(25,72,69,.18);backdrop-filter:blur(18px) saturate(1.7);-webkit-backdrop-filter:blur(18px) saturate(1.7)}
+    .fab::before,.fab::after{width:23px;height:2.4px}
+    .fab:active{transform:translateY(-18px) scale(.88)}
+    .fab.editing{transform:translateY(-18px) rotate(45deg)}
+    .toast{bottom:calc(110px + var(--safe-bottom));font-size:15px;font-weight:620;padding:13px 18px}
+
+    /* Slightly richer environment so translucent glass has something to refract. */
+    .ambient{
+      background:
+        radial-gradient(circle at 10% 7%,rgba(126,202,196,.24),transparent 29%),
+        radial-gradient(circle at 92% 16%,rgba(231,177,115,.18),transparent 30%),
+        linear-gradient(180deg,var(--bg),var(--bg-deep));
+    }
+    .ambient::before,.ambient::after{opacity:.32;filter:blur(66px)}
+    [data-theme="dark"] .ambient{
+      background:
+        radial-gradient(circle at 12% 7%,rgba(82,148,153,.20),transparent 31%),
+        radial-gradient(circle at 91% 17%,rgba(105,83,138,.18),transparent 30%),
+        linear-gradient(180deg,var(--bg),var(--bg-deep));
+    }
+    [data-theme="dark"] .ambient::before,[data-theme="dark"] .ambient::after{opacity:.22}
+
+    /* Scroll makes the chrome optically denser, like iOS scroll-edge material. */
+    body.chrome-scrolled .topbar,
+    body.chrome-scrolled .bottom-nav{
+      backdrop-filter:blur(46px) saturate(1.95) brightness(1.03);
+      -webkit-backdrop-filter:blur(46px) saturate(1.95) brightness(1.03);
+      box-shadow:0 20px 58px rgba(35,54,62,.18),inset 0 1px 0 rgba(255,255,255,.72);
+    }
+    [data-theme="dark"] body.chrome-scrolled .topbar,
+    [data-theme="dark"] body.chrome-scrolled .bottom-nav{
+      box-shadow:0 22px 60px rgba(0,0,0,.40),inset 0 1px 0 rgba(255,255,255,.15);
+    }
+
+    @media(max-width:390px){
+      main{padding-left:14px;padding-right:14px}
+      .topbar-wrap{padding-left:11px;padding-right:11px}
+      .topbar{padding-left:17px}
+      .app-name{font-size:23px}
+      .week-label{font-size:13.5px;max-width:240px}
+      .page-heading h1,.page-heading h2,.meds-header h2,.settings-header h2{font-size:34px}
+      .pc-main{font-size:35px}
+      .slot-section{padding-left:39px}
+      .slot-icon{left:-39px}
+      .med-name{font-size:18.5px}
+      .time-setting-card{padding:14px 13px}
+      .time-setting-left{gap:9px}
+      .time-setting-icon{width:44px;height:44px;border-radius:18px}
+      .time-setting-label{font-size:18px}
+      .time-setting-sub{font-size:13px}
+      .time-select{height:48px;font-size:15.5px;padding:0 4px}
+      .time-select.hr,.time-select.min{width:47px}
+      .time-select.ap{width:53px}
+      .bottom-nav-wrap{width:calc(100% - 14px)}
+      .nav-btn span{font-size:11.5px}
+    }
+    @media(max-width:350px){
+      .time-setting-card{align-items:stretch;flex-direction:column;gap:12px}
+      .time-picker-group{justify-content:flex-end}
+      .time-select.hr,.time-select.min{width:58px}
+      .time-select.ap{width:64px}
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       FLUENT 2 CONTENT SYSTEM × LIQUID GLASS CHROME
+       Fluent: hierarchy, spacing, semantic surfaces, accessibility.
+       Liquid Glass: navigation, floating controls, schedule rail, sheet.
+    ═══════════════════════════════════════════════════════ */
+    :root{
+      --f-bg-1:#f7f9fa;
+      --f-bg-2:#eef2f4;
+      --f-bg-3:#e7ecee;
+      --f-card:#ffffff;
+      --f-card-subtle:#f8fafb;
+      --f-text:#172126;
+      --f-text-secondary:#53636a;
+      --f-text-tertiary:#74838a;
+      --f-stroke:#d7dfe2;
+      --f-stroke-subtle:#e7ecee;
+      --f-brand:#47736f;
+      --f-brand-fill:#47736f;
+      --f-on-brand:#ffffff;
+      --f-brand-hover:#426f6b;
+      --f-brand-pressed:#355d59;
+      --f-brand-subtle:#e3f0ee;
+      --f-success:#3d7a5b;
+      --f-danger:#b64d53;
+      --f-danger-subtle:#fbeaec;
+      --space-1:4px;
+      --space-2:8px;
+      --space-3:12px;
+      --space-4:16px;
+      --space-5:20px;
+      --space-6:24px;
+      --space-7:28px;
+      --space-8:32px;
+      --space-10:40px;
+      --touch:48px;
+      --content-radius:18px;
+      --control-radius:14px;
+      --group-radius:20px;
+      --content-shadow:0 1px 2px rgba(23,33,38,.04),0 4px 14px rgba(23,33,38,.035);
+    }
+    [data-theme="dark"]{
+      --f-bg-1:#101619;
+      --f-bg-2:#171f23;
+      --f-bg-3:#1d282d;
+      --f-card:#1a2327;
+      --f-card-subtle:#161e22;
+      --f-text:#f4f7f8;
+      --f-text-secondary:#bcc7cb;
+      --f-text-tertiary:#91a0a6;
+      --f-stroke:#344249;
+      --f-stroke-subtle:#2a363c;
+      --f-brand:#8bc0bb;
+      --f-brand-fill:#4e7f7a;
+      --f-on-brand:#ffffff;
+      --f-brand-hover:#9dcec9;
+      --f-brand-pressed:#afd9d5;
+      --f-brand-subtle:#1d3938;
+      --f-success:#87bea0;
+      --f-danger:#ed969b;
+      --f-danger-subtle:#40252a;
+      --content-shadow:none;
+    }
+
+    html,body{background:var(--f-bg-1)}
+    body{
+      color:var(--f-text);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI","Noto Sans Bengali",Roboto,Arial,sans-serif;
+      font-size:18px;
+      line-height:1.5;
+      letter-spacing:0;
+      text-rendering:optimizeLegibility;
+    }
+    button,input,select{font:inherit}
+    button{touch-action:manipulation}
+    .app-shell{width:min(100%,600px);padding-bottom:calc(134px + var(--safe-bottom))}
+
+    /* A restrained canvas gives the glass layer depth without colouring the content layer. */
+    .ambient{
+      background:
+        radial-gradient(circle at 8% 4%,rgba(103,176,169,.17),transparent 27%),
+        radial-gradient(circle at 94% 10%,rgba(221,173,118,.11),transparent 25%),
+        linear-gradient(180deg,var(--f-bg-1),var(--f-bg-2));
+    }
+    .ambient::before,.ambient::after{opacity:.20;filter:blur(82px)}
+    [data-theme="dark"] .ambient{
+      background:
+        radial-gradient(circle at 8% 4%,rgba(73,132,135,.15),transparent 27%),
+        radial-gradient(circle at 94% 10%,rgba(91,77,118,.11),transparent 25%),
+        linear-gradient(180deg,var(--f-bg-1),var(--f-bg-2));
+    }
+
+    /* Liquid chrome only. */
+    .topbar,.bottom-nav,.day-strip,.add-sheet,.toast{
+      backdrop-filter:blur(30px) saturate(1.75);
+      -webkit-backdrop-filter:blur(30px) saturate(1.75);
+    }
+    .topbar-wrap{padding:calc(var(--space-3) + var(--safe-top)) var(--space-3) var(--space-2)}
+    .topbar{
+      min-height:64px;
+      border-radius:24px;
+      padding:var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+      background:linear-gradient(145deg,rgba(255,255,255,.23),rgba(255,255,255,.07)),var(--glass);
+    }
+    .brand-block{display:flex;align-items:center;min-height:48px}
+    .app-name{font-size:24px;line-height:1.15;font-weight:650;letter-spacing:-.45px}
+    .week-label{display:none!important}
+    .top-actions{gap:var(--space-2)}
+    .date-pill{
+      min-height:44px;
+      border-radius:15px;
+      padding:0 var(--space-3);
+      font-size:15px;
+      font-weight:600;
+      color:var(--f-text);
+    }
+    .icon-btn{width:44px;height:44px;border-radius:15px}
+    .icon-btn svg{width:21px;height:21px}
+
+    main{padding:var(--space-4) var(--space-5) 0}
+    .page-heading,.meds-header,.settings-header{
+      min-height:auto;
+      margin:0;
+      padding:var(--space-4) 0 var(--space-6);
+      align-items:center;
+    }
+    .page-heading h1,.page-heading h2,.meds-header h2,.settings-header h2{
+      margin:0;
+      color:var(--f-text);
+      font-size:36px;
+      line-height:1.15;
+      font-weight:650;
+      letter-spacing:-.75px;
+    }
+    .page-meta,.meds-count{
+      color:var(--f-text-secondary);
+      font-size:16px;
+      line-height:1.3;
+      font-weight:600;
+    }
+
+    /* Fluent content surface: solid, calm, semantic. */
+    .progress-card{
+      margin-bottom:var(--space-7);
+      padding:var(--space-6);
+      border-radius:var(--content-radius);
+      background:var(--f-card);
+      border:1px solid var(--f-stroke-subtle);
+      box-shadow:var(--content-shadow);
+      overflow:hidden;
+    }
+    .progress-card::before{
+      content:"";
+      position:absolute;
+      inset:0 auto 0 0;
+      width:4px;
+      background:var(--f-brand-fill);
+    }
+    .progress-card::after{display:none}
+    [data-theme="dark"] .progress-card{background:var(--f-card);border-color:var(--f-stroke-subtle)}
+    .pc-day{
+      color:var(--f-text-secondary);
+      font-size:15px;
+      line-height:1.35;
+      font-weight:600;
+      letter-spacing:0;
+      text-transform:none;
+    }
+    .pc-dot{width:10px;height:10px;background:var(--f-brand-fill);box-shadow:0 0 0 5px var(--f-brand-subtle)}
+    .pc-main{margin-top:var(--space-3);font-size:38px;line-height:1.12;font-weight:650;letter-spacing:-.8px;color:var(--f-text)}
+    .pc-sub{margin-top:var(--space-2);font-size:18px;line-height:1.45;font-weight:500;color:var(--f-text-secondary)}
+    .pc-bar-wrap{height:8px;margin-top:var(--space-5);background:var(--f-bg-3);border-radius:999px}
+    .pc-bar-fill{background:var(--f-brand-fill);border-radius:999px}
+    .pc-completed{margin-top:var(--space-3);font-size:15px;line-height:1.35;font-weight:600;color:var(--f-text-secondary);letter-spacing:0;text-transform:none}
+
+    .all-clear{
+      margin-bottom:var(--space-7);
+      border-radius:var(--content-radius);
+      background:var(--f-card);
+      border:1px solid var(--f-stroke-subtle);
+      box-shadow:var(--content-shadow);
+      overflow:hidden;
+    }
+    .all-clear-top{
+      width:100%;
+      border:0;
+      background:transparent;
+      color:var(--f-text);
+      padding:var(--space-6);
+      text-align:left;
+      cursor:pointer;
+    }
+    .all-clear-top::before{display:inline-grid;place-items:center;margin:0 var(--space-3) 0 0;vertical-align:middle}
+    .ac-title{display:inline;vertical-align:middle;font-size:25px;line-height:1.2;font-weight:650;color:var(--f-text)}
+    .ac-hint{margin:var(--space-3) 0 0 62px;font-size:16px;font-weight:600;color:var(--f-brand)}
+    .all-clear-body{border-top:1px solid var(--f-stroke-subtle);background:var(--f-card-subtle);padding:var(--space-3)}
+
+    /* Timeline: hierarchy by spacing, not decorative containers. */
+    .timeline{padding-bottom:var(--space-2)}
+    .slot-section{padding-left:44px;margin-bottom:var(--space-8)}
+    .slot-section::before{left:17px;top:40px;bottom:calc(-1 * var(--space-8));width:2px;background:var(--f-stroke)}
+    .slot-header{min-height:40px;gap:var(--space-3);margin-bottom:var(--space-3)}
+    .slot-icon{
+      left:-44px;
+      width:36px;height:36px;
+      border-radius:12px;
+      background:var(--f-card);
+      border:1px solid var(--f-stroke);
+      box-shadow:none;
+    }
+    .slot-title{font-size:20px;line-height:1.2;font-weight:650;letter-spacing:0;color:var(--f-text)!important}
+    .slot-subtitle{margin-top:2px;font-size:15px;line-height:1.25;font-weight:500;color:var(--f-text-secondary)}
+    .slot-count{
+      min-width:48px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:var(--f-bg-2);
+      color:var(--f-text-secondary);
+      border:1px solid var(--f-stroke-subtle);
+      font-size:14px;
+      font-weight:650;
+    }
+    .slot-section.is-current .slot-count{background:var(--f-brand-subtle);color:var(--f-brand);border-color:color-mix(in srgb,var(--f-brand) 25%,transparent)}
+
+    .med-card{
+      min-height:90px;
+      margin-bottom:var(--space-3);
+      padding:var(--space-4);
+      gap:var(--space-4);
+      border-radius:var(--content-radius);
+      background:var(--f-card);
+      border:1px solid var(--f-stroke-subtle);
+      box-shadow:none;
+      color:var(--f-text);
+    }
+    .slot-section.is-current .med-card{border-color:color-mix(in srgb,var(--f-brand) 36%,var(--f-stroke));box-shadow:0 0 0 1px color-mix(in srgb,var(--f-brand) 10%,transparent)}
+    .med-card.checked{opacity:.72;background:var(--f-card-subtle)}
+    .med-card.checked .med-name{text-decoration:none;color:var(--f-text-secondary)}
+    .med-checkbox{
+      appearance:none;
+      -webkit-appearance:none;
+      width:44px;height:44px;flex:0 0 44px;
+      border-radius:14px;
+      border:2px solid var(--f-stroke);
+      background:var(--f-card);
+      display:grid;place-items:center;
+      cursor:pointer;
+      transition:background 160ms ease,border-color 160ms ease,transform 160ms ease;
+    }
+    .med-checkbox:active{transform:scale(.94)}
+    .med-checkbox.checked{background:var(--f-brand-fill);border-color:var(--f-brand-fill)}
+    .med-checkbox.checked::after{font-size:21px;color:#fff}
+    .med-name{font-size:20px;line-height:1.35;font-weight:620;color:var(--f-text);letter-spacing:0}
+    .med-tags{margin-top:var(--space-2);gap:var(--space-2)}
+    .med-tag,.food-badge,.time-chip{
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:14px;
+      line-height:1.25;
+      font-weight:600;
+    }
+    .tag-before,.badge-before{background:#fff1d6;color:#7a4b00}
+    .tag-after,.badge-after{background:#dff4e9;color:#245f43}
+    [data-theme="dark"] .tag-before,[data-theme="dark"] .badge-before{background:#493716;color:#ffd58d}
+    [data-theme="dark"] .tag-after,[data-theme="dark"] .badge-after{background:#1d3c2d;color:#a7e2c3}
+
+    /* Schedule is navigation, so it remains glass. */
+    .day-strip-wrap{top:88px;margin-bottom:var(--space-6)}
+    .day-strip{gap:var(--space-1);padding:var(--space-2);border-radius:22px}
+    .day-btn{
+      appearance:none;
+      -webkit-appearance:none;
+      min-width:48px;
+      min-height:72px;
+      height:auto;
+      border:0;
+      border-radius:16px;
+      background:transparent;
+      color:var(--f-text-secondary);
+      cursor:pointer;
+    }
+    .day-btn.active{background:var(--f-brand-fill);color:var(--f-on-brand);box-shadow:0 5px 14px rgba(41,94,90,.18)}
+    .day-btn.active .day-name,.day-btn.active .day-num{color:var(--f-on-brand)}
+    .day-name{font-size:13px;font-weight:600;letter-spacing:0;text-transform:none}
+    .day-num{font-size:22px;font-weight:650}
+
+    /* Medicine library: flatter, easier to scan. */
+    .med-plan-card{
+      border-radius:var(--content-radius);
+      padding:var(--space-5);
+      margin-bottom:var(--space-3);
+      background:var(--f-card);
+      border:1px solid var(--f-stroke-subtle);
+      box-shadow:none;
+    }
+    .med-plan-name{font-size:22px;line-height:1.3;font-weight:650;color:var(--f-text);letter-spacing:0}
+    .med-dot{background:var(--f-brand)}
+    .med-plan-meta{margin-top:var(--space-5);gap:var(--space-4)}
+    .meta-label{font-size:14px;line-height:1.3;font-weight:600;color:var(--f-text-secondary);text-transform:none;letter-spacing:0}
+    .meta-value{font-size:17px;line-height:1.4;font-weight:500;color:var(--f-text)}
+    .med-plan-actions{gap:var(--space-2);margin-top:var(--space-5)}
+    .btn-edit,.btn-delete{
+      min-height:52px;height:auto;
+      border-radius:var(--control-radius);
+      border:1px solid var(--f-stroke);
+      box-shadow:none;
+    }
+    .btn-edit{background:var(--f-card-subtle);color:var(--f-text);font-size:17px;font-weight:600}
+    .btn-delete{width:52px;background:var(--f-danger-subtle);border-color:transparent;color:var(--f-danger)}
+    .add-new-card{
+      width:100%;
+      min-height:60px;
+      margin-top:var(--space-5);
+      padding:0 var(--space-5);
+      border-radius:var(--control-radius);
+      border:1px solid color-mix(in srgb,var(--f-brand) 42%,var(--f-stroke));
+      background:var(--f-brand-subtle);
+      color:var(--f-brand);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:var(--space-3);
+      cursor:pointer;
+      box-shadow:none;
+    }
+    .add-new-card .anc-icon{font-size:28px;line-height:1;font-weight:400;margin:0}
+    .add-new-card h3{font-size:18px;line-height:1.2;font-weight:650;color:inherit;margin:0}
+
+    /* Settings become one grouped list surface. */
+    .settings-group{
+      overflow:hidden;
+      border-radius:var(--group-radius);
+      background:var(--f-card);
+      border:1px solid var(--f-stroke-subtle);
+      box-shadow:var(--content-shadow);
+    }
+    .time-setting-card{
+      min-height:92px;
+      margin:0;
+      padding:var(--space-4) var(--space-4);
+      gap:var(--space-3);
+      border:0;
+      border-bottom:1px solid var(--f-stroke-subtle);
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
+    }
+    .time-setting-card:last-child{border-bottom:0}
+    .time-setting-left{gap:var(--space-3)}
+    .time-setting-icon{
+      width:48px;height:48px;
+      border-radius:14px;
+      background:var(--f-bg-2)!important;
+      border:1px solid var(--f-stroke-subtle);
+    }
+    .time-setting-label{font-size:20px;line-height:1.2;font-weight:650;color:var(--f-text)}
+    .time-setting-sub{margin-top:2px;font-size:15px;line-height:1.25;font-weight:500;color:var(--f-text-secondary)}
+    .time-picker-group{gap:var(--space-1)}
+    .time-select{
+      min-height:52px;height:52px;
+      border-radius:12px;
+      border:1px solid var(--f-stroke);
+      background:var(--f-card-subtle);
+      color:var(--f-text);
+      font-size:17px;
+      font-weight:600;
+      padding:0 6px;
+    }
+    .time-select:focus{border-color:var(--f-brand);box-shadow:0 0 0 2px color-mix(in srgb,var(--f-brand) 22%,transparent)}
+    .time-colon{font-size:18px;color:var(--f-text-secondary)}
+
+    /* Bottom sheet is a floating control layer; its controls are standard Fluent surfaces. */
+    .add-sheet{
+      border-radius:30px 30px 0 0;
+      padding:var(--space-2) var(--space-5) calc(var(--space-6) + var(--safe-bottom));
+      max-height:min(91dvh,900px);
+    }
+    .sheet-grabber{width:48px;height:5px;margin:4px auto var(--space-4);background:rgba(88,105,112,.34)}
+    .sheet-head{padding:0 0 var(--space-6)}
+    .add-view-header h2{font-size:32px;line-height:1.2;font-weight:650;letter-spacing:-.55px;color:var(--f-text)}
+    .sheet-close{width:48px;height:48px;border-radius:15px;background:var(--f-card);border:1px solid var(--f-stroke);color:var(--f-text)}
+    .form-section{margin-bottom:var(--space-6)}
+    .form-section-label{display:block;margin:0 0 var(--space-2);font-size:16px;line-height:1.3;font-weight:650;color:var(--f-text);letter-spacing:0;text-transform:none}
+    .name-input-wrap input{
+      min-height:60px;height:auto;
+      border-radius:var(--control-radius);
+      border:1px solid var(--f-stroke);
+      background:var(--f-card);
+      color:var(--f-text);
+      padding:14px 50px 14px 16px;
+      font-size:19px;
+      line-height:1.35;
+      font-weight:500;
+    }
+    .name-input-wrap input:focus{border-color:var(--f-brand);box-shadow:0 0 0 2px color-mix(in srgb,var(--f-brand) 22%,transparent)}
+    .time-pill-group{gap:var(--space-2)}
+    .time-pill{
+      min-height:58px;
+      border-radius:var(--control-radius);
+      border:1px solid var(--f-stroke);
+      background:var(--f-card);
+      color:var(--f-text);
+      font-size:17px;
+      font-weight:600;
+      box-shadow:none;
+    }
+    .time-pill.selected{background:var(--f-brand-fill);border-color:var(--f-brand-fill);color:var(--f-on-brand)}
+    .day-picker-row{padding:var(--space-2);gap:var(--space-1);border-radius:var(--control-radius);background:var(--f-card);border:1px solid var(--f-stroke)}
+    .day-circle{min-height:44px;border-radius:10px;background:transparent;color:var(--f-text-secondary);font-size:15px;font-weight:600}
+    .day-circle.selected{background:var(--f-brand-fill);color:var(--f-on-brand)}
+    .all-days-btn{min-height:52px;border-radius:var(--control-radius);border:1px solid var(--f-stroke);background:var(--f-card);color:var(--f-text);font-size:16px;font-weight:600}
+    .all-days-btn.selected{background:var(--f-brand-subtle);border-color:color-mix(in srgb,var(--f-brand) 30%,var(--f-stroke));color:var(--f-brand)}
+    .food-option{
+      width:100%;
+      min-height:64px;
+      padding:var(--space-3) var(--space-4);
+      border-radius:var(--control-radius);
+      border:1px solid var(--f-stroke);
+      background:var(--f-card);
+      color:var(--f-text);
+      text-align:left;
+      box-shadow:none;
+    }
+    .food-option.selected{background:var(--f-brand-subtle);border-color:var(--f-brand-fill)}
+    .food-label{font-size:19px;font-weight:600;color:inherit}
+    .food-radio{width:28px;height:28px;border-color:var(--f-stroke)}
+    .food-option.selected .food-radio{border-color:var(--f-brand-fill)}
+    .food-option.selected .food-radio::after{background:var(--f-brand-fill)}
+    .nav-btn.active{color:var(--f-brand)}
+    .btn-submit{
+      min-height:60px;height:auto;
+      padding:14px var(--space-5);
+      border-radius:var(--control-radius);
+      background:var(--f-brand-fill);
+      color:var(--f-on-brand);
+      font-size:19px;
+      font-weight:650;
+      box-shadow:none;
+    }
+    .btn-submit:active{background:var(--f-brand-pressed)}
+
+    /* Liquid dock retained as the strongest glass element. */
+    .bottom-nav-wrap{bottom:calc(var(--space-3) + var(--safe-bottom));width:min(calc(100% - 20px),580px)}
+    .bottom-nav{height:82px;border-radius:29px;grid-template-columns:1fr 1fr 66px 1fr 1fr;padding:7px}
+    .nav-lens{top:7px;height:68px;border-radius:22px}
+    .nav-btn{min-width:0;height:68px;border-radius:22px;gap:5px}
+    .nav-btn svg{width:23px;height:23px}
+    .nav-btn>span{font-size:12.5px;line-height:1.1;font-weight:600;white-space:nowrap}
+    .nav-label-short{display:none}
+    .fab{width:64px;height:64px;border-radius:23px;transform:translateY(-18px)}
+    .toast{font-size:16px;line-height:1.3;font-weight:600}
+
+    .no-medicines{padding:var(--space-10) var(--space-5)}
+    .no-medicines p{font-size:18px;line-height:1.55;font-weight:500;color:var(--f-text-secondary)}
+
+    /* Fluent accessibility: visible focus, high contrast, and 320px reflow. */
+    :where(button,input,select,[tabindex]):focus-visible{
+      outline:3px solid color-mix(in srgb,var(--f-brand) 68%,#ffffff 12%);
+      outline-offset:3px;
+    }
+    @media(prefers-contrast:more){
+      :root{--f-stroke:#7b8a90;--f-stroke-subtle:#aab5b9}
+      [data-theme="dark"]{--f-stroke:#b5c1c5;--f-stroke-subtle:#718188}
+      .med-card,.med-plan-card,.settings-group,.progress-card{border-width:2px}
+      .glass,.bottom-nav,.day-strip,.add-sheet{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:var(--f-card)!important}
+    }
+    @media(max-width:420px){
+      main{padding-left:var(--space-4);padding-right:var(--space-4)}
+      .page-heading h1,.page-heading h2,.meds-header h2,.settings-header h2{font-size:34px}
+      .pc-main{font-size:35px}
+      .progress-card{padding:var(--space-5)}
+      .med-card{padding:var(--space-3) var(--space-4)}
+      .time-setting-card{align-items:flex-start;flex-direction:column;padding:var(--space-4)}
+      .time-picker-group{width:100%;justify-content:flex-end}
+      .time-select.hr,.time-select.min{width:58px}
+      .time-select.ap{width:64px}
+    }
+    @media(max-width:360px){
+      body{font-size:17px}
+      .topbar-wrap{padding-left:8px;padding-right:8px}
+      main{padding-left:12px;padding-right:12px}
+      .date-pill{display:none}
+      .page-heading h1,.page-heading h2,.meds-header h2,.settings-header h2{font-size:32px}
+      .slot-section{padding-left:42px}
+      .slot-icon{left:-42px}
+      .bottom-nav-wrap{width:calc(100% - 12px)}
+      .bottom-nav{grid-template-columns:1fr 1fr 60px 1fr 1fr;padding:6px}
+      .nav-btn>span{font-size:12px}
+      .nav-label-full{display:none}
+      .nav-label-short{display:inline}
+      .fab{width:58px;height:58px}
+    }
+
+
+    /* Final mobile/reflow hardening. */
+    .day-strip{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+    .day-btn{flex:0 0 48px;scroll-snap-align:center}
+    .nav-btn .nav-label-full,.nav-btn .nav-label-short{font-size:inherit;font-weight:inherit;line-height:inherit}
+    @media(hover:hover) and (pointer:fine){
+      .add-new-card:hover{background:color-mix(in srgb,var(--f-brand-subtle) 72%,var(--f-card));border-color:var(--f-brand)}
+      .btn-edit:hover{background:var(--f-bg-2)}
+    }
+    @media(max-width:360px){
+      .day-picker-row{grid-template-columns:repeat(4,1fr);gap:var(--space-2)}
+      .day-circle{aspect-ratio:auto;min-height:48px}
+    }
+
+    /* Batch 1 controls, expressed in the reference Fluent/liquid-glass language. */
+    .notification-warning{
+      display:none;
+      align-items:center;
+      gap:var(--space-3);
+      margin:0 0 var(--space-5);
+      padding:var(--space-4);
+      border:1px solid color-mix(in srgb,#c47727 38%,var(--f-stroke));
+      border-radius:var(--content-radius);
+      background:color-mix(in srgb,#fff3dc 72%,var(--f-card));
+      color:var(--f-text);
+      box-shadow:var(--content-shadow);
+    }
+    [data-theme="dark"] .notification-warning{background:#34291b;border-color:#614a2b}
+    .notification-warning.show{display:flex}
+    .notification-warning-icon{
+      width:48px;height:48px;flex:0 0 48px;border-radius:14px;
+      display:grid;place-items:center;background:rgba(176,105,30,.12);color:#9a5a18
+    }
+    [data-theme="dark"] .notification-warning-icon{color:#f3bd79;background:rgba(243,189,121,.12)}
+    .notification-warning-icon svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .notification-warning-copy{flex:1;min-width:0}
+    .notification-warning-title{font-size:18px;line-height:1.3;font-weight:650}
+    .notification-warning-text{margin-top:3px;font-size:15px;line-height:1.45;font-weight:500;color:var(--f-text-secondary)}
+    .notification-warning-button,.notification-status-button{
+      min-height:48px;padding:0 var(--space-4);border:0;border-radius:var(--control-radius);
+      background:var(--f-brand-fill);color:var(--f-on-brand);font-size:16px;font-weight:650;cursor:pointer
+    }
+
+    .notification-status-card{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin:0 0 var(--space-5);padding:var(--space-4);
+      border:1px solid var(--f-stroke-subtle);border-radius:var(--content-radius);
+      background:var(--f-card);box-shadow:var(--content-shadow)
+    }
+    .notification-status-dot{width:12px;height:12px;flex:0 0 12px;border-radius:50%;background:#b27a38;box-shadow:0 0 0 6px rgba(178,122,56,.12)}
+    .notification-status-copy{flex:1;min-width:0}
+    .notification-status-title{font-size:18px;line-height:1.3;font-weight:650;color:var(--f-text)}
+    .notification-status-text{margin-top:3px;font-size:15px;line-height:1.45;font-weight:500;color:var(--f-text-secondary)}
+    .notification-status-card.enabled .notification-status-dot{background:var(--f-success);box-shadow:0 0 0 6px color-mix(in srgb,var(--f-success) 14%,transparent)}
+    .notification-status-card.enabled .notification-status-button{display:none}
+    .notification-status-card.blocked{border-color:color-mix(in srgb,#c47727 30%,var(--f-stroke))}
+
+    .dose-time-editors{display:grid;gap:var(--space-3);margin-top:var(--space-3)}
+    .slot-time-editor{
+      padding:var(--space-4);border:1px solid var(--f-stroke);
+      border-radius:var(--content-radius);background:var(--f-card-subtle)
+    }
+    .slot-time-editor-header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-2)}
+    .slot-time-editor-title{display:flex;align-items:center;gap:var(--space-2);font-size:18px;line-height:1.3;font-weight:650;color:var(--f-text)}
+    .editor-slot-icon{width:22px;height:22px;display:inline-grid;place-items:center;color:var(--f-brand)}
+    .editor-slot-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8}
+    .slot-time-editor-sub{margin-top:3px;font-size:14px;line-height:1.4;color:var(--f-text-secondary)}
+    .dose-time-row{
+      display:flex;align-items:center;gap:var(--space-3);min-height:68px;
+      margin-top:var(--space-2);padding:var(--space-3);
+      border:1px solid var(--f-stroke-subtle);border-radius:var(--control-radius);background:var(--f-card)
+    }
+    .dose-time-copy{flex:1;min-width:0}
+    .dose-time-mode{font-size:13px;line-height:1.3;font-weight:600;color:var(--f-text-secondary)}
+    .dose-time-value{margin-top:3px;font-size:18px;line-height:1.3;font-weight:650;color:var(--f-text)}
+    .dose-time-input{
+      width:142px;min-height:50px;padding:8px 10px;border:1px solid var(--f-stroke);
+      border-radius:12px;background:var(--f-card-subtle);color:var(--f-text);font-size:17px;font-weight:600;outline:none
+    }
+    .dose-time-input:focus{border-color:var(--f-brand);box-shadow:0 0 0 2px color-mix(in srgb,var(--f-brand) 22%,transparent)}
+    .dose-time-actions{display:flex;align-items:center;gap:var(--space-2);flex:0 0 auto}
+    .btn-time-small,.btn-add-time{
+      min-height:46px;padding:0 var(--space-3);border:1px solid var(--f-stroke);
+      border-radius:12px;background:var(--f-card-subtle);color:var(--f-brand);font-size:15px;font-weight:650;cursor:pointer
+    }
+    .btn-time-remove{width:46px;min-width:46px;padding:0;background:var(--f-danger-subtle);border-color:transparent;color:var(--f-danger);font-size:22px}
+    .btn-add-time{width:100%;margin-top:var(--space-3);border-style:dashed;background:transparent}
+    .field-helper{margin-top:var(--space-2);font-size:14px;line-height:1.5;font-weight:500;color:var(--f-text-secondary)}
+
+    .start-mode-group{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)}
+    .start-mode-btn,.duration-select-trigger,.start-date-input,.duration-number{
+      width:100%;min-height:56px;padding:10px var(--space-4);border:1px solid var(--f-stroke);
+      border-radius:var(--control-radius);background:var(--f-card);color:var(--f-text);
+      font-size:17px;line-height:1.3;font-weight:600;outline:none
+    }
+    .start-mode-btn{cursor:pointer}
+    .start-mode-btn.selected{background:var(--f-brand-subtle);border-color:var(--f-brand-fill);color:var(--f-brand)}
+    .start-date-wrap{display:none;margin-top:var(--space-2)}
+    .start-date-wrap.show{display:block}
+    .start-date-input:focus,.duration-number:focus{border-color:var(--f-brand);box-shadow:0 0 0 2px color-mix(in srgb,var(--f-brand) 22%,transparent)}
+    .duration-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(112px,.8fr);gap:var(--space-2)}
+    .duration-select{position:relative}
+    .duration-select-trigger{display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left}
+    .duration-select-trigger.open{border-color:var(--f-brand)}
+    .duration-chevron{color:var(--f-text-secondary);transition:transform 180ms ease}
+    .duration-select-trigger.open .duration-chevron{transform:rotate(180deg)}
+    .duration-menu{
+      display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:260;
+      padding:var(--space-1);border:1px solid var(--f-stroke);border-radius:var(--control-radius);
+      background:var(--f-card);box-shadow:0 18px 44px rgba(30,45,51,.20)
+    }
+    .duration-menu.open{display:block}
+    .duration-option{
+      width:100%;min-height:46px;padding:0 var(--space-3);border:0;border-radius:11px;
+      background:transparent;color:var(--f-text);text-align:left;font-size:16px;font-weight:550;cursor:pointer
+    }
+    .duration-option.selected{background:var(--f-brand-subtle);color:var(--f-brand);font-weight:650}
+    .duration-number:disabled{opacity:.55;background:var(--f-bg-2)}
+
+    .med-plan-badges{display:flex;align-items:flex-end;gap:var(--space-2);flex-wrap:wrap;justify-content:flex-end}
+    .course-status{padding:6px 10px;border-radius:999px;font-size:14px;line-height:1.25;font-weight:600;white-space:nowrap}
+    .status-active{background:var(--f-brand-subtle);color:var(--f-brand)}
+    .status-upcoming{background:#e8eff8;color:#365f8b}
+    .status-completed{background:var(--f-bg-2);color:var(--f-text-secondary)}
+    [data-theme="dark"] .status-upcoming{background:#1d3044;color:#a9caed}
+    .course-summary{display:flex;flex-direction:column;gap:3px}
+
+    @media(max-width:420px){
+      .notification-warning,.notification-status-card{align-items:flex-start;flex-wrap:wrap}
+      .notification-warning-button,.notification-status-button{margin-left:60px}
+      .duration-row{grid-template-columns:1fr}
+      .dose-time-row{align-items:flex-start;flex-wrap:wrap}
+      .dose-time-actions{width:100%;justify-content:flex-end}
+      .med-plan-top{flex-direction:column}
+      .med-plan-badges{justify-content:flex-start;align-items:flex-start}
+    }
+
   </style>
 </head>
-<body>
+<body data-period="morning">
+<div class="ambient" aria-hidden="true"></div>
 
-<header>
-  <div class="header-row">
-    <div class="app-name">💊 MediTrack</div>
-    <div class="date-pill" id="headerDate"></div>
-  </div>
-  <div class="week-label" id="weekLabel"></div>
-</header>
-
-<nav class="tabs">
-  <button class="active" onclick="switchTab('today')">Today</button>
-  <button onclick="switchTab('week')">Week</button>
-  <button onclick="switchTab('add')">Add</button>
-  <button onclick="switchTab('meds')">Meds</button>
-  <button onclick="switchTab('settings')">⏰</button>
-</nav>
-
-<main>
-
-  <div class="notification-warning" id="notificationWarning" role="alert">
-    <div class="notification-warning-icon" aria-hidden="true">🔕</div>
-    <div class="notification-warning-copy">
-      <div class="notification-warning-title">Medicine alarms are off</div>
-      <div class="notification-warning-text" id="notificationWarningText">Enable notifications so alarms can appear with a safe Dismiss control.</div>
-    </div>
-    <button type="button" class="notification-warning-button" onclick="openNotificationSettings()">Enable</button>
+<div class="app-shell">
+  <div class="topbar-wrap">
+    <header class="topbar glass">
+      <div class="brand-block">
+        <div class="app-name">MediTrack</div>
+        <div class="week-label" id="weekLabel"></div>
+      </div>
+      <div class="top-actions">
+        <div class="date-pill" id="headerDate"></div>
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle appearance" onclick="toggleTheme()">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg>
+        </button>
+      </div>
+    </header>
   </div>
 
-  <!-- ── TODAY VIEW ── -->
-  <div class="view active" id="view-today">
+  <main id="mainContent">
 
-    <div class="all-clear" id="allClear">
-      <div class="all-clear-top" onclick="toggleAllClearExpand()">
-        <div class="ac-emoji">🎉</div>
-        <div class="ac-title">All done for today!</div>
-        <div class="ac-sub">Every medicine has been taken. Great job!</div>
-        <div class="ac-hint">▼ Tap to review or correct</div>
+    <aside class="notification-warning" id="notificationWarning" role="alert">
+      <div class="notification-warning-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/><path d="m4 4 16 16"/></svg>
       </div>
-      <div class="all-clear-body" id="allClearBody"></div>
-    </div>
-
-    <div class="progress-card" id="progressCard" style="display:none">
-      <div class="pc-day">
-        <span id="pcDay"></span>
-        <span class="pc-dot"></span>
+      <div class="notification-warning-copy">
+        <div class="notification-warning-title">Medicine alarms are off</div>
+        <div class="notification-warning-text" id="notificationWarningText">Enable notifications so alarms can appear with a safe Dismiss control.</div>
       </div>
-      <div class="pc-main" id="pcMain">—</div>
-      <div class="pc-sub"  id="pcSub"></div>
-      <div class="pc-bar-wrap"><div class="pc-bar-fill" id="pcBarFill" style="width:0%"></div></div>
-      <div class="pc-completed" id="pcCompleted"></div>
-    </div>
-
-    <div id="todaySlots"></div>
-  </div>
-
-  <!-- ── WEEK VIEW ── -->
-  <div class="view" id="view-week">
-    <div class="day-strip" id="dayStrip"></div>
-    <div id="weekSlots"></div>
-  </div>
-
-  <!-- ── ADD VIEW ── -->
-  <div class="view" id="view-add">
-    <div class="add-view-header">
-      <h2 id="addFormTitle">Add Medicine</h2>
-      <p id="addFormSub">Set up a daily medication entry.</p>
-    </div>
-
-    <div class="form-section">
-      <span class="form-section-label">Medicine Name</span>
-      <div class="name-input-wrap">
-        <input type="text" id="medNameInput" placeholder="e.g. Metformin 1000mg" />
-        <span class="name-input-icon">💊</span>
+      <button type="button" class="notification-warning-button" onclick="openNotificationSettings()">Enable</button>
+    </aside>
+    <section class="view screen-view active" id="view-today">
+      <div class="page-heading simple-heading">
+        <h1 id="todayHeading">Today</h1>
+        <div class="page-meta" id="todayMeta"></div>
       </div>
-    </div>
 
-    <div class="form-section">
-      <span class="form-section-label">Time of Day</span>
-      <div class="time-pill-group">
-        <button class="time-pill" data-time="morning"   onclick="toggleTime(this)">🌅 সকাল</button>
-        <button class="time-pill" data-time="afternoon" onclick="toggleTime(this)">☀️ দুপুর</button>
-        <button class="time-pill" data-time="evening"   onclick="toggleTime(this)">🌆 বিকাল</button>
-        <button class="time-pill" data-time="night"     onclick="toggleTime(this)">🌙 রাত</button>
+      <div class="all-clear" id="allClear">
+        <button class="all-clear-top" type="button" onclick="toggleAllClearExpand()" aria-expanded="false" aria-controls="allClearBody">
+          <div class="ac-emoji">✓</div>
+          <div class="ac-title">All done for today</div>
+          <div class="ac-sub" aria-hidden="true"></div>
+          <div class="ac-hint">Review</div>
+        </button>
+        <div class="all-clear-body" id="allClearBody"></div>
       </div>
-      <div class="dose-time-editors" id="doseTimeEditors"></div>
-      <p class="field-helper">Each selected slot begins at its Settings time. Change it here only when this medicine needs a different time.</p>
-    </div>
 
-    <div class="form-section">
-      <span class="form-section-label">Frequency</span>
-      <div class="day-picker-row">
-        <button class="day-circle selected" data-day="mon" onclick="toggleDay(this)">M</button>
-        <button class="day-circle selected" data-day="tue" onclick="toggleDay(this)">T</button>
-        <button class="day-circle selected" data-day="wed" onclick="toggleDay(this)">W</button>
-        <button class="day-circle selected" data-day="thu" onclick="toggleDay(this)">T</button>
-        <button class="day-circle selected" data-day="fri" onclick="toggleDay(this)">F</button>
-        <button class="day-circle selected" data-day="sat" onclick="toggleDay(this)">S</button>
-        <button class="day-circle selected" data-day="sun" onclick="toggleDay(this)">S</button>
+      <div class="progress-card" id="progressCard" role="status" aria-live="polite" style="display:none">
+        <div class="pc-day">
+          <span id="pcDay"></span>
+          <span class="pc-dot"></span>
+        </div>
+        <div class="pc-main" id="pcMain">—</div>
+        <div class="pc-sub" id="pcSub"></div>
+        <div class="pc-bar-wrap"><div class="pc-bar-fill" id="pcBarFill" style="width:0%"></div></div>
+        <div class="pc-completed" id="pcCompleted"></div>
       </div>
-      <button class="all-days-btn selected" id="allDaysBtn" onclick="selectAllDays()">✓ All Days of the Week</button>
-    </div>
 
-    <div class="form-section">
-      <span class="form-section-label">Start</span>
-      <div class="start-mode-group">
-        <button type="button" class="start-mode-btn selected" id="startTodayBtn" onclick="selectStartMode('today')">Start Today</button>
-        <button type="button" class="start-mode-btn" id="selectStartDateBtn" onclick="selectStartMode('date')">Select Start Date</button>
-      </div>
-      <div class="start-date-wrap" id="startDateWrap">
-        <input class="start-date-input" type="date" id="medicineStartDate" aria-label="Medicine start date" />
-      </div>
-    </div>
+      <div class="timeline" id="todaySlots"></div>
+    </section>
 
-    <div class="form-section">
-      <span class="form-section-label">Duration</span>
-      <div class="duration-row">
-        <div class="duration-select" id="durationSelect">
-          <button type="button" class="duration-select-trigger" id="durationTrigger"
-            aria-haspopup="listbox" aria-expanded="false" onclick="toggleDurationMenu(event)">
-            <span id="durationUnitLabel">Indefinite</span>
-            <span class="duration-chevron">⌄</span>
-          </button>
-          <div class="duration-menu" id="durationMenu" role="listbox">
-            <button type="button" class="duration-option" data-duration-unit="days" onclick="selectDurationUnit('days')">Days</button>
-            <button type="button" class="duration-option" data-duration-unit="weeks" onclick="selectDurationUnit('weeks')">Weeks</button>
-            <button type="button" class="duration-option" data-duration-unit="months" onclick="selectDurationUnit('months')">Months</button>
-            <button type="button" class="duration-option" data-duration-unit="years" onclick="selectDurationUnit('years')">Years</button>
-            <button type="button" class="duration-option selected" data-duration-unit="indefinite" onclick="selectDurationUnit('indefinite')">Indefinite</button>
+    <section class="view screen-view" id="view-week">
+      <div class="page-heading simple-heading">
+        <h2>Schedule</h2>
+      </div>
+      <div class="day-strip-wrap">
+        <div class="day-strip" id="dayStrip"></div>
+      </div>
+      <div class="timeline" id="weekSlots"></div>
+    </section>
+
+    <section class="view screen-view" id="view-meds">
+      <div class="meds-header">
+        <h2>Medicines</h2>
+        <span class="meds-count" id="medsCount"></span>
+      </div>
+      <div id="medicineList"></div>
+      <button class="add-new-card" type="button" onclick="switchTab('add')">
+        <div class="anc-icon">+</div><h3>Add medicine</h3>
+      </button>
+    </section>
+
+    <section class="view screen-view" id="view-settings">
+      <div class="settings-header">
+        <h2>Reminder times</h2>
+      </div>
+
+
+      <div class="notification-status-card" id="notificationStatusCard">
+        <div class="notification-status-dot" aria-hidden="true"></div>
+        <div class="notification-status-copy">
+          <div class="notification-status-title" id="notificationStatusTitle">Checking alarm access…</div>
+          <div class="notification-status-text" id="notificationStatusText">MediTrack is checking whether medicine alarms can be displayed.</div>
+        </div>
+        <button type="button" class="notification-status-button" onclick="openNotificationSettings()">Enable</button>
+      </div>
+
+      <div class="settings-group">
+      <div class="time-setting-card">
+        <div class="time-setting-left">
+          <div class="time-setting-icon morning" data-slot-icon="morning"></div>
+          <div><div class="time-setting-label">সকাল</div><div class="time-setting-sub">Morning</div></div>
+        </div>
+        <div class="time-picker-group">
+          <select class="time-select hr" id="hr-morning" onchange="saveSlotTimes()"></select><span class="time-colon">:</span>
+          <select class="time-select min" id="min-morning" onchange="saveSlotTimes()"></select>
+          <select class="time-select ap" id="ap-morning" onchange="saveSlotTimes()"><option value="AM">AM</option><option value="PM">PM</option></select>
+        </div>
+      </div>
+
+      <div class="time-setting-card">
+        <div class="time-setting-left">
+          <div class="time-setting-icon afternoon" data-slot-icon="afternoon"></div>
+          <div><div class="time-setting-label">দুপুর</div><div class="time-setting-sub">Afternoon</div></div>
+        </div>
+        <div class="time-picker-group">
+          <select class="time-select hr" id="hr-afternoon" onchange="saveSlotTimes()"></select><span class="time-colon">:</span>
+          <select class="time-select min" id="min-afternoon" onchange="saveSlotTimes()"></select>
+          <select class="time-select ap" id="ap-afternoon" onchange="saveSlotTimes()"><option value="AM">AM</option><option value="PM">PM</option></select>
+        </div>
+      </div>
+
+      <div class="time-setting-card">
+        <div class="time-setting-left">
+          <div class="time-setting-icon evening" data-slot-icon="evening"></div>
+          <div><div class="time-setting-label">বিকাল</div><div class="time-setting-sub">Evening</div></div>
+        </div>
+        <div class="time-picker-group">
+          <select class="time-select hr" id="hr-evening" onchange="saveSlotTimes()"></select><span class="time-colon">:</span>
+          <select class="time-select min" id="min-evening" onchange="saveSlotTimes()"></select>
+          <select class="time-select ap" id="ap-evening" onchange="saveSlotTimes()"><option value="AM">AM</option><option value="PM">PM</option></select>
+        </div>
+      </div>
+
+      <div class="time-setting-card">
+        <div class="time-setting-left">
+          <div class="time-setting-icon night" data-slot-icon="night"></div>
+          <div><div class="time-setting-label">রাত</div><div class="time-setting-sub">Night</div></div>
+        </div>
+        <div class="time-picker-group">
+          <select class="time-select hr" id="hr-night" onchange="saveSlotTimes()"></select><span class="time-colon">:</span>
+          <select class="time-select min" id="min-night" onchange="saveSlotTimes()"></select>
+          <select class="time-select ap" id="ap-night" onchange="saveSlotTimes()"><option value="AM">AM</option><option value="PM">PM</option></select>
+        </div>
+      </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<div class="sheet-backdrop" id="addSheet" onclick="sheetBackdropClick(event)">
+  <section class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="addFormTitle">
+    <div class="sheet-grabber"></div>
+    <div class="view" id="view-add">
+      <div class="sheet-head">
+        <div class="add-view-header">
+          <h2 id="addFormTitle">Add medicine</h2>
+          <p id="addFormSub" aria-hidden="true"></p>
+        </div>
+        <button class="sheet-close" type="button" aria-label="Close" onclick="closeAddSheet()">×</button>
+      </div>
+
+      <div class="form-section">
+        <span class="form-section-label">Medicine name</span>
+        <div class="name-input-wrap">
+          <input type="text" id="medNameInput" placeholder="e.g. Metformin 1000 mg" autocomplete="off" />
+          <span class="name-input-icon">pill</span>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <span class="form-section-label">Time of day</span>
+        <div class="time-pill-group">
+          <button class="time-pill" data-time="morning" type="button" onclick="toggleTime(this)"><span class="mini-icon" data-inline-slot="morning"></span>সকাল</button>
+          <button class="time-pill" data-time="afternoon" type="button" onclick="toggleTime(this)"><span class="mini-icon" data-inline-slot="afternoon"></span>দুপুর</button>
+          <button class="time-pill" data-time="evening" type="button" onclick="toggleTime(this)"><span class="mini-icon" data-inline-slot="evening"></span>বিকাল</button>
+          <button class="time-pill" data-time="night" type="button" onclick="toggleTime(this)"><span class="mini-icon" data-inline-slot="night"></span>রাত</button>
+        </div>
+
+        <div class="dose-time-editors" id="doseTimeEditors"></div>
+        <p class="field-helper">Each selected slot begins at its Settings time. Change it here only when this medicine needs a different time.</p>
+      </div>
+
+      <div class="form-section">
+        <span class="form-section-label">Frequency</span>
+        <div class="day-picker-row">
+          <button class="day-circle selected" data-day="mon" type="button" onclick="toggleDay(this)">M</button>
+          <button class="day-circle selected" data-day="tue" type="button" onclick="toggleDay(this)">T</button>
+          <button class="day-circle selected" data-day="wed" type="button" onclick="toggleDay(this)">W</button>
+          <button class="day-circle selected" data-day="thu" type="button" onclick="toggleDay(this)">T</button>
+          <button class="day-circle selected" data-day="fri" type="button" onclick="toggleDay(this)">F</button>
+          <button class="day-circle selected" data-day="sat" type="button" onclick="toggleDay(this)">S</button>
+          <button class="day-circle selected" data-day="sun" type="button" onclick="toggleDay(this)">S</button>
+        </div>
+        <button class="all-days-btn selected" id="allDaysBtn" type="button" onclick="selectAllDays()">All days of the week</button>
+      </div>
+
+
+      <div class="form-section">
+        <span class="form-section-label">Start</span>
+        <div class="start-mode-group">
+          <button type="button" class="start-mode-btn selected" id="startTodayBtn" onclick="selectStartMode('today')">Start today</button>
+          <button type="button" class="start-mode-btn" id="selectStartDateBtn" onclick="selectStartMode('date')">Select date</button>
+        </div>
+        <div class="start-date-wrap" id="startDateWrap">
+          <input class="start-date-input" type="date" id="medicineStartDate" aria-label="Medicine start date" />
+        </div>
+      </div>
+
+      <div class="form-section">
+        <span class="form-section-label">Duration</span>
+        <div class="duration-row">
+          <div class="duration-select" id="durationSelect">
+            <button type="button" class="duration-select-trigger" id="durationTrigger" aria-haspopup="listbox" aria-expanded="false" onclick="toggleDurationMenu(event)">
+              <span id="durationUnitLabel">Indefinite</span><span class="duration-chevron">⌄</span>
+            </button>
+            <div class="duration-menu" id="durationMenu" role="listbox">
+              <button type="button" class="duration-option" data-duration-unit="days" onclick="selectDurationUnit('days')">Days</button>
+              <button type="button" class="duration-option" data-duration-unit="weeks" onclick="selectDurationUnit('weeks')">Weeks</button>
+              <button type="button" class="duration-option" data-duration-unit="months" onclick="selectDurationUnit('months')">Months</button>
+              <button type="button" class="duration-option" data-duration-unit="years" onclick="selectDurationUnit('years')">Years</button>
+              <button type="button" class="duration-option selected" data-duration-unit="indefinite" onclick="selectDurationUnit('indefinite')">Indefinite</button>
+            </div>
           </div>
+          <input class="duration-number" type="number" id="durationValue" inputmode="numeric" min="1" step="1" placeholder="Number" aria-label="Duration amount" disabled />
         </div>
-        <input class="duration-number" type="number" id="durationValue" inputmode="numeric"
-          min="1" step="1" placeholder="Number" aria-label="Duration amount" disabled />
+        <p class="field-helper" id="durationHelper">This medicine continues until you change or remove it.</p>
       </div>
-      <p class="field-helper" id="durationHelper">This medicine continues until you change or remove it.</p>
-    </div>
 
-    <div class="form-section">
-      <span class="form-section-label">Food Timing</span>
-      <div onclick="selectFood('before')" class="food-option" id="food-before">
-        <span class="food-icon">🍽️</span>
-        <span class="food-label">খাবার আগে</span>
-        <div class="food-radio"></div>
+      <div class="form-section">
+        <span class="form-section-label">Food timing</span>
+        <button type="button" onclick="selectFood('before')" class="food-option" id="food-before">
+          <span class="food-icon"></span><span class="food-label">খাবার আগে</span><span class="food-radio"></span>
+        </button>
+        <button type="button" onclick="selectFood('after')" class="food-option" id="food-after">
+          <span class="food-icon"></span><span class="food-label">খাবার পরে</span><span class="food-radio"></span>
+        </button>
       </div>
-      <div onclick="selectFood('after')" class="food-option" id="food-after">
-        <span class="food-icon">🥄</span>
-        <span class="food-label">খাবার পরে</span>
-        <div class="food-radio"></div>
-      </div>
-    </div>
 
-    <button class="btn-submit" id="addSubmitBtn" onclick="addOrUpdateMedicine()">Add Medicine</button>
-  </div>
+      <button class="btn-submit" id="addSubmitBtn" type="button" onclick="addOrUpdateMedicine()">Add medicine</button>
+    </div>
+  </section>
+</div>
 
-  <!-- ── MEDS VIEW ── -->
-  <div class="view" id="view-meds">
-    <div class="week-reset-info">📅 Medicines follow their selected days and treatment duration.</div>
-    <div class="meds-header">
-      <h2>Your Medicines</h2>
-      <span class="meds-count" id="medsCount"></span>
-    </div>
-    <div id="medicineList"></div>
-    <div class="add-new-card" onclick="switchTab('add')">
-      <div class="anc-icon">➕</div>
-      <h3>Add New Medicine</h3>
-      <p>Tap to set up a new medication.</p>
-    </div>
-  </div>
-  <!-- ── SETTINGS VIEW ── -->
-  <div class="view" id="view-settings">
-    <div class="settings-header">
-      <h2>⏰ Reminder Times</h2>
-      <p>Set when you want to be reminded for each slot.</p>
-    </div>
-
-    <div class="notification-status-card" id="notificationStatusCard">
-      <div class="notification-status-dot" aria-hidden="true"></div>
-      <div class="notification-status-copy">
-        <div class="notification-status-title" id="notificationStatusTitle">Checking alarm access…</div>
-        <div class="notification-status-text" id="notificationStatusText">MediTrack is checking whether medicine alarms can be displayed.</div>
-      </div>
-      <button type="button" class="notification-status-button" onclick="openNotificationSettings()">Enable</button>
-    </div>
-
-    <div class="time-setting-card">
-      <div class="time-setting-left">
-        <div class="time-setting-icon morning">🌅</div>
-        <div>
-          <div class="time-setting-label">সকাল</div>
-          <div class="time-setting-sub">Morning</div>
-        </div>
-      </div>
-      <div class="time-picker-group">
-        <select class="time-select hr" id="hr-morning" onchange="saveSlotTimes()"></select>
-        <span class="time-colon">:</span>
-        <select class="time-select min" id="min-morning" onchange="saveSlotTimes()"></select>
-        <select class="time-select ap" id="ap-morning" onchange="saveSlotTimes()">
-          <option value="AM">AM</option><option value="PM">PM</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="time-setting-card">
-      <div class="time-setting-left">
-        <div class="time-setting-icon afternoon">☀️</div>
-        <div>
-          <div class="time-setting-label">দুপুর</div>
-          <div class="time-setting-sub">Afternoon</div>
-        </div>
-      </div>
-      <div class="time-picker-group">
-        <select class="time-select hr" id="hr-afternoon" onchange="saveSlotTimes()"></select>
-        <span class="time-colon">:</span>
-        <select class="time-select min" id="min-afternoon" onchange="saveSlotTimes()"></select>
-        <select class="time-select ap" id="ap-afternoon" onchange="saveSlotTimes()">
-          <option value="AM">AM</option><option value="PM">PM</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="time-setting-card">
-      <div class="time-setting-left">
-        <div class="time-setting-icon evening">🌆</div>
-        <div>
-          <div class="time-setting-label">বিকাল</div>
-          <div class="time-setting-sub">Evening</div>
-        </div>
-      </div>
-      <div class="time-picker-group">
-        <select class="time-select hr" id="hr-evening" onchange="saveSlotTimes()"></select>
-        <span class="time-colon">:</span>
-        <select class="time-select min" id="min-evening" onchange="saveSlotTimes()"></select>
-        <select class="time-select ap" id="ap-evening" onchange="saveSlotTimes()">
-          <option value="AM">AM</option><option value="PM">PM</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="time-setting-card">
-      <div class="time-setting-left">
-        <div class="time-setting-icon night">🌙</div>
-        <div>
-          <div class="time-setting-label">রাত</div>
-          <div class="time-setting-sub">Night</div>
-        </div>
-      </div>
-      <div class="time-picker-group">
-        <select class="time-select hr" id="hr-night" onchange="saveSlotTimes()"></select>
-        <span class="time-colon">:</span>
-        <select class="time-select min" id="min-night" onchange="saveSlotTimes()"></select>
-        <select class="time-select ap" id="ap-night" onchange="saveSlotTimes()">
-          <option value="AM">AM</option><option value="PM">PM</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="settings-note">
-      💡 Changes are saved automatically. Reminders will ring at the times you set, even if the app is closed.
-    </div>
-  </div>
-</main>
+<div class="bottom-nav-wrap">
+  <nav class="bottom-nav" id="bottomNav" aria-label="Primary">
+    <div class="nav-lens" id="navLens"></div>
+    <button class="nav-btn active" data-tab="today" type="button" onclick="switchTab('today')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2 12 4l8 7.2"/><path d="M6.5 10.5V20h11v-9.5"/><path d="M9.5 20v-5h5v5"/></svg><span><span class="nav-label-full">Today</span><span class="nav-label-short">Today</span></span>
+    </button>
+    <button class="nav-btn" data-tab="week" type="button" onclick="switchTab('week')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M7.5 3.5v4M16.5 3.5v4M3.5 9.5h17"/></svg><span><span class="nav-label-full">Schedule</span><span class="nav-label-short">Plan</span></span>
+    </button>
+    <button class="fab" id="addFab" type="button" aria-label="Add medicine" onclick="switchTab('add')"></button>
+    <button class="nav-btn" data-tab="meds" type="button" onclick="switchTab('meds')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.4 4.7 4.7 8.4a5.1 5.1 0 0 0 7.2 7.2l3.7-3.7a5.1 5.1 0 0 0-7.2-7.2Z"/><path d="m8 16 8-8"/></svg><span><span class="nav-label-full">Medicines</span><span class="nav-label-short">Meds</span></span>
+    </button>
+    <button class="nav-btn" data-tab="settings" type="button" onclick="switchTab('settings')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.2v-2.4l2-1.2-2-3.4-2.3.7a8 8 0 0 0-2.1-1.2L14 3h-4l-.6 2.7a8 8 0 0 0-2.1 1.2L5 6.2 3 9.6l2 1.2v2.4l-2 1.2 2 3.4 2.3-.7a8 8 0 0 0 2.1 1.2L10 21h4l.6-2.7a8 8 0 0 0 2.1-1.2l2.3.7 2-3.4-2-1.2Z"/></svg><span><span class="nav-label-full">Settings</span><span class="nav-label-short">Settings</span></span>
+    </button>
+  </nav>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -1014,21 +2186,132 @@
     return med.id + '_' + dose.id;
   }
 
-  function getNextSlotLabel(todayStr, checkKeys) {
+function getNextSlotLabel(todayStr, checkKeys) {
     const times = readSlotTimes();
     const due = [];
     state.medicines.forEach(med => {
       if (!isMedScheduledForDate(med, todayStr)) return;
       (med.doses || []).forEach(dose => {
-        const slot = SLOTS.find(s => s.id === getDoseSlot(dose));
+        const slot = SLOTS.find(item => item.id === getDoseSlot(dose));
         if (!slot || checkKeys[getDoseCheckKey(med, dose)]) return;
-        due.push({ slot, time: getEffectiveDoseTime(dose, times) });
+        due.push({slot, time:getEffectiveDoseTime(dose, times)});
       });
     });
     due.sort((a,b) => a.time.localeCompare(b.time));
     if (!due.length) return '';
-    return `${due[0].slot.icon} ${due[0].slot.label} · ${formatClockTime(due[0].time)}`;
+    return `${due[0].slot.name} · ${due[0].slot.label} · ${formatClockTime(due[0].time)}`;
   }
+
+
+  function slotSvg(id) {
+    const icons = {
+      morning:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/></svg>',
+      afternoon:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="11" r="4"/><path d="M12 2.5v2.4M4.9 5.1l1.7 1.7M19.1 5.1l-1.7 1.7M3 11h2.4M18.6 11H21M5 18h14"/></svg>',
+      evening:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5h16"/><path d="M6.5 15.5a5.5 5.5 0 0 1 11 0"/><path d="M12 4v3M5.7 7.2l2 2M18.3 7.2l-2 2M3 20h18"/></svg>',
+      night:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg>'
+    };
+    return icons[id] || '';
+  }
+
+  function hydrateStaticIcons() {
+    document.querySelectorAll('[data-slot-icon]').forEach(el => { el.innerHTML = slotSvg(el.dataset.slotIcon); });
+    document.querySelectorAll('[data-inline-slot]').forEach(el => { el.innerHTML = slotSvg(el.dataset.inlineSlot); });
+  }
+
+  function getPeriod() {
+    const hour = new Date().getHours();
+    if (hour < 11) return 'morning';
+    if (hour < 16) return 'afternoon';
+    if (hour < 20) return 'evening';
+    return 'night';
+  }
+
+  function updateAmbient() { document.body.dataset.period = getPeriod(); }
+
+  function applyTheme(theme) {
+    const value = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = value;
+    localStorage.setItem('meditrack_theme', value);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', value === 'dark' ? '#101619' : '#f7f9fa');
+  }
+
+  function initTheme() {
+    const saved = localStorage.getItem('meditrack_theme');
+    const preferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    applyTheme(saved || preferred);
+  }
+
+  function toggleTheme() {
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  }
+
+  function firstIncompleteSlot(dayStr) {
+    const checkKeys = state.checks[dayStr] || {};
+    for (const slot of SLOTS) {
+      const entries = [];
+      state.medicines.forEach(med => {
+        if (!isMedScheduledForDate(med, dayStr)) return;
+        (med.doses || []).forEach(dose => {
+          if (getDoseSlot(dose) === slot.id) entries.push({med, dose});
+        });
+      });
+      if (entries.some(({med,dose}) => !checkKeys[getDoseCheckKey(med,dose)])) return slot.id;
+    }
+    return null;
+  }
+
+  function moveNavLens() {
+    const nav = document.getElementById('bottomNav');
+    const lens = document.getElementById('navLens');
+    const active = nav ? nav.querySelector('.nav-btn.active') : null;
+    if (!nav || !lens || !active) return;
+    lens.style.left = active.offsetLeft + 'px';
+    lens.style.width = active.offsetWidth + 'px';
+  }
+
+  function openAddSheet() {
+    const sheet = document.getElementById('addSheet');
+    sheet.classList.add('open');
+    sheet.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('addFab').classList.add('editing');
+    requestAnimationFrame(() => document.getElementById('medNameInput').focus({preventScroll:true}));
+  }
+
+  function closeAddSheet(reset = true) {
+    const sheet = document.getElementById('addSheet');
+    if (!sheet.classList.contains('open')) return;
+    sheet.classList.remove('open');
+    sheet.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    document.getElementById('addFab').classList.remove('editing');
+    closeDurationMenu();
+    if (reset) resetAddForm();
+  }
+
+  function sheetBackdropClick(event) {
+    if (event.target === event.currentTarget) closeAddSheet();
+  }
+
+  function getDayDoseDensity(dayStr) {
+    return SLOTS.map(slot => state.medicines.some(med =>
+      isMedScheduledForDate(med, dayStr) && (med.doses || []).some(dose => getDoseSlot(dose) === slot.id)
+    ));
+  }
+
+  function changeWeekDay(delta) {
+    const today = new Date();
+    const monday = getMondayOf(today);
+    const current = selectedWeekDay ? parseDateKey(selectedWeekDay) : today;
+    let index = Math.round((current - monday) / 86400000);
+    index = Math.min(6, Math.max(0, index + delta));
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + index);
+    selectedWeekDay = dateKey(date);
+    renderWeek();
+  }
+
 
   // ── Android Native Bridge ──────────────────────────────
   // Syncs medicine data to the native Android alarm scheduler
@@ -1205,42 +2488,55 @@
   // ── Tab Switching ──────────────────────────────────────
   let activeTab = 'today';
 
-  function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + tab).classList.add('active');
-  document.querySelectorAll('nav.tabs button').forEach((b,i) => {
-    b.classList.toggle('active', ['today','week','add','meds','settings'][i] === tab);
-  });
-  renderAll();
-}
+function switchTab(tab) {
+    if (tab === 'add') {
+      openAddSheet();
+      return;
+    }
+    activeTab = tab;
+    closeAddSheet(false);
+    document.querySelectorAll('.screen-view').forEach(view => view.classList.remove('active'));
+    const target = document.getElementById('view-' + tab);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(button => {
+      button.classList.toggle('active', button.dataset.tab === tab);
+    });
+    requestAnimationFrame(moveNavLens);
+    renderAll();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
 
   // ── Rendering ──────────────────────────────────────────
-  function renderAll() {
-  updateHeader();
-  if (activeTab === 'today') renderToday();
-  if (activeTab === 'week')  renderWeek();
-  if (activeTab === 'meds')  renderMeds();
-  if (activeTab === 'settings') loadSlotTimes();
-}
+function renderAll() {
+    updateHeader();
+    updateAmbient();
+    updateNotificationAccessUI();
+    if (activeTab === 'today') renderToday();
+    if (activeTab === 'week') renderWeek();
+    if (activeTab === 'meds') renderMeds();
+    if (activeTab === 'settings') loadSlotTimes();
+  }
 
-  function updateHeader() {
+function updateHeader() {
     const now = new Date();
-    document.getElementById('headerDate').textContent =
-      DAYS_S[now.getDay()] + ', ' + MONTHS[now.getMonth()] + ' ' + now.getDate();
+    document.getElementById('headerDate').textContent = DAYS_S[now.getDay()] + ', ' + MONTHS[now.getMonth()] + ' ' + now.getDate();
     const monday = getMondayOf(now);
-    const sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
-    document.getElementById('weekLabel').textContent =
-      'Week of ' + MONTHS[monday.getMonth()] + ' ' + monday.getDate() +
-      ' – ' + MONTHS[sunday.getMonth()] + ' ' + sunday.getDate();
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    document.getElementById('weekLabel').textContent = 'Week of ' + MONTHS[monday.getMonth()] + ' ' + monday.getDate() + ' – ' + MONTHS[sunday.getMonth()] + ' ' + sunday.getDate();
+    const greeting = getPeriod() === 'morning' ? 'Good morning' : getPeriod() === 'afternoon' ? 'Good afternoon' : getPeriod() === 'evening' ? 'Good evening' : 'Tonight';
+    document.getElementById('todayHeading').textContent = greeting;
+    document.getElementById('todayMeta').textContent = DAYS[now.getDay()];
   }
 
   // ── Build Slots HTML ───────────────────────────────────
-  function buildSlotsHTML(dayStr, interactive) {
+function buildSlotsHTML(dayStr, interactive) {
     let html = '';
-    let totalDoses = 0, doneDoses = 0;
+    let totalDoses = 0;
+    let doneDoses = 0;
     const slotTimes = readSlotTimes();
     const checkKeys = state.checks[dayStr] || {};
+    const currentSlot = interactive ? firstIncompleteSlot(dayStr) : null;
 
     for (const slot of SLOTS) {
       const entries = [];
@@ -1248,108 +2544,89 @@
         if (!isMedScheduledForDate(med, dayStr)) return;
         (med.doses || []).forEach(dose => {
           if (getDoseSlot(dose) === slot.id) {
-            entries.push({ med, dose, effectiveTime: getEffectiveDoseTime(dose, slotTimes) });
+            entries.push({med, dose, effectiveTime:getEffectiveDoseTime(dose, slotTimes)});
           }
         });
       });
-      if (entries.length === 0) continue;
+      if (!entries.length) continue;
+      entries.sort((a,b) => a.effectiveTime.localeCompare(b.effectiveTime) || a.med.name.localeCompare(b.med.name));
 
-      entries.sort((a,b) =>
-        a.effectiveTime.localeCompare(b.effectiveTime) || a.med.name.localeCompare(b.med.name)
-      );
-
-      const checkedCount = entries.filter(({med,dose}) =>
-        checkKeys[getDoseCheckKey(med, dose)]
-      ).length;
-      doneDoses += checkedCount;
+      const checkedCount = entries.filter(({med,dose}) => checkKeys[getDoseCheckKey(med,dose)]).length;
+      const isDone = checkedCount === entries.length;
+      const isCurrent = currentSlot === slot.id;
       totalDoses += entries.length;
+      doneDoses += checkedCount;
 
-      html += `<div class="slot-section" data-slot="${slot.id}">
-        <div class="slot-header ${slot.cls}">
-          <div class="slot-icon">${slot.icon}</div>
-          <div class="slot-title">${slot.label}</div>
+      html += `<div class="slot-section ${slot.cls} ${isDone ? 'is-done' : ''} ${isCurrent ? 'is-current' : ''}" data-slot="${slot.id}">
+        <div class="slot-header">
+          <div class="slot-icon">${slotSvg(slot.id)}</div>
+          <div><div class="slot-title">${slot.label}</div><div class="slot-subtitle">${slot.name}</div></div>
           <div class="slot-count">${checkedCount}/${entries.length}</div>
         </div>`;
 
-      for (const { med, dose, effectiveTime } of entries) {
-        const key     = getDoseCheckKey(med, dose);
-        const checked = !!(checkKeys[key]);
-        const foodTag = dose
-          ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
-          : '';
-        const timeTag = `<span class="med-tag tag-time">⏰ ${formatClockTime(effectiveTime)}${dose.useDefaultTime !== false ? ' · Default' : ''}</span>`;
-
+      for (const {med, dose, effectiveTime} of entries) {
+        const key = getDoseCheckKey(med, dose);
+        const checked = !!checkKeys[key];
+        const foodTag = `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? 'খাবার আগে' : 'খাবার পরে'}</span>`;
+        const mode = dose.useDefaultTime !== false ? ' · Default' : '';
+        const timeTag = `<span class="med-tag tag-time">${formatClockTime(effectiveTime)}${mode}</span>`;
         if (interactive) {
           html += `<div class="med-card ${checked ? 'checked' : ''}" id="card-${dayStr}-${key}">
-            <div class="med-checkbox ${checked ? 'checked' : ''}" onclick="toggleCheck('${dayStr}','${key}')"></div>
-            <div class="med-info">
-              <div class="med-name">${escapeHTML(med.name)}</div>
-              <div class="med-tags">${timeTag}${foodTag}</div>
-            </div>
+            <button type="button" class="med-checkbox ${checked ? 'checked' : ''}" aria-label="${checked ? 'Mark not taken' : 'Mark taken'}" onclick="toggleCheck('${dayStr}','${key}')"></button>
+            <div class="med-info"><div class="med-name">${escapeHTML(med.name)}</div><div class="med-tags">${timeTag}${foodTag}</div></div>
           </div>`;
         } else {
           html += `<div class="med-card ${checked ? 'checked' : ''}">
-            <div class="med-info">
-              <div class="med-name">${escapeHTML(med.name)}</div>
-              <div class="med-tags">${timeTag}${foodTag}</div>
-            </div>
+            <div class="med-info"><div class="med-name">${escapeHTML(med.name)}</div><div class="med-tags">${timeTag}${foodTag}</div></div>
           </div>`;
         }
       }
-      html += `</div>`;
+      html += '</div>';
     }
 
     if (!html) {
-      html = `<div class="no-medicines">
-        <div class="big-icon">💊</div>
-        <p>No medicines scheduled for this day.<br>Go to <strong>Add</strong> tab to add some.</p>
-      </div>`;
+      html = '<div class="no-medicines"><div class="big-icon"></div><p>No medicines scheduled here.<br>Use the <strong>+</strong> button to add one.</p></div>';
     }
-
-    return { html, totalDoses, doneDoses };
+    return {html,totalDoses,doneDoses};
   }
 
   // ── Render Today ───────────────────────────────────────
-  function renderToday() {
-    const today  = todayKey();
-    const { html, totalDoses, doneDoses } = buildSlotsHTML(today, true);
-
-    document.getElementById('todaySlots').innerHTML = html;
-
-    const card     = document.getElementById('progressCard');
+function renderToday() {
+    const today = todayKey();
+    const {html,totalDoses,doneDoses} = buildSlotsHTML(today, true);
+    const slots = document.getElementById('todaySlots');
+    const card = document.getElementById('progressCard');
     const allClear = document.getElementById('allClear');
+    slots.innerHTML = html;
 
-    if (totalDoses === 0) {
+    if (!totalDoses) {
       card.style.display = 'none';
       allClear.classList.remove('show');
-      document.getElementById('todaySlots').style.display = 'block';
+      slots.style.display = 'block';
+      document.getElementById('todayMeta').textContent = 'No doses';
       return;
     }
 
-    const left   = totalDoses - doneDoses;
-    const pct    = Math.round((doneDoses / totalDoses) * 100);
-    const now    = new Date();
+    const left = totalDoses - doneDoses;
+    const pct = Math.round((doneDoses / totalDoses) * 100);
+    const now = new Date();
     const checkKeys = state.checks[today] || {};
-
-    document.getElementById('pcDay').textContent =
-      DAYS[now.getDay()].toUpperCase() + ', ' + now.getDate() + ' · TODAY';
-    document.getElementById('pcMain').textContent =
-      left + ' Dose' + (left !== 1 ? 's' : '') + ' left';
-    document.getElementById('pcSub').textContent =
-      left > 0 ? 'Next: ' + (getNextSlotLabel(today, checkKeys) || '') : '';
+    document.getElementById('pcDay').textContent = DAYS[now.getDay()] + ' · ' + now.getDate();
+    document.getElementById('pcMain').textContent = left + ' dose' + (left !== 1 ? 's' : '') + ' left';
+    document.getElementById('pcSub').textContent = left > 0 ? 'Next · ' + (getNextSlotLabel(today, checkKeys) || '') : '';
     document.getElementById('pcBarFill').style.width = pct + '%';
-    document.getElementById('pcCompleted').textContent =
-      doneDoses + ' OF ' + totalDoses + ' COMPLETED';
+    document.getElementById('pcCompleted').textContent = doneDoses + ' of ' + totalDoses + ' completed';
+    document.getElementById('todayMeta').textContent = doneDoses + '/' + totalDoses;
 
-    if (doneDoses === totalDoses && totalDoses > 0) {
+    if (doneDoses === totalDoses) {
       allClear.classList.add('show');
       card.style.display = 'none';
-      document.getElementById('todaySlots').style.display = 'none';
+      slots.style.display = 'none';
       buildAllClearBody();
     } else {
       allClear.classList.remove('show');
       card.style.display = 'block';
-      document.getElementById('todaySlots').style.display = 'block';
+      slots.style.display = 'block';
     }
   }
 
@@ -1417,43 +2694,38 @@
   }
 
   // ── All Clear Collapsible ──────────────────────────────
-  function toggleAllClearExpand() {
+function toggleAllClearExpand() {
     const body = document.getElementById('allClearBody');
     const hint = document.querySelector('.ac-hint');
+    const trigger = document.querySelector('.all-clear-top');
     const isOpen = body.classList.toggle('open');
-    hint.textContent = isOpen ? '▲ Tap to collapse' : '▼ Tap to review or correct';
+    if (trigger) trigger.setAttribute('aria-expanded', String(isOpen));
+    if (hint) hint.textContent = isOpen ? 'Hide' : 'Review';
   }
 
-  function buildAllClearBody() {
-    const today    = todayKey();
+function buildAllClearBody() {
+    const today = todayKey();
     const slotTimes = readSlotTimes();
     let html = '';
-
     for (const slot of SLOTS) {
       const entries = [];
       state.medicines.forEach(med => {
         if (!isMedScheduledForDate(med, today)) return;
         (med.doses || []).forEach(dose => {
-          if (getDoseSlot(dose) === slot.id) {
-            entries.push({ med, dose, effectiveTime: getEffectiveDoseTime(dose, slotTimes) });
-          }
+          if (getDoseSlot(dose) === slot.id) entries.push({med,dose,effectiveTime:getEffectiveDoseTime(dose,slotTimes)});
         });
       });
-      if (entries.length === 0) continue;
+      if (!entries.length) continue;
       entries.sort((a,b) => a.effectiveTime.localeCompare(b.effectiveTime));
-      html += `<div class="slot-title-ac">${slot.icon} ${slot.label}</div>`;
-      for (const {med, dose, effectiveTime} of entries) {
-        const key  = getDoseCheckKey(med,dose);
-        const foodTag = dose
-          ? `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে'}</span>`
-          : '';
-        const timeTag = `<span class="med-tag tag-time">⏰ ${formatClockTime(effectiveTime)}${dose.useDefaultTime !== false ? ' · Default' : ''}</span>`;
+      html += `<div class="slot-title-ac">${slot.name} · ${slot.label}</div>`;
+      for (const {med,dose,effectiveTime} of entries) {
+        const key = getDoseCheckKey(med,dose);
+        const foodTag = `<span class="med-tag tag-${dose.food}">${dose.food === 'before' ? 'খাবার আগে' : 'খাবার পরে'}</span>`;
+        const mode = dose.useDefaultTime !== false ? ' · Default' : '';
+        const timeTag = `<span class="med-tag tag-time">${formatClockTime(effectiveTime)}${mode}</span>`;
         html += `<div class="med-card checked" id="card-${today}-${key}">
-          <div class="med-checkbox checked" onclick="toggleCheck('${today}','${key}')"></div>
-          <div class="med-info">
-            <div class="med-name">${escapeHTML(med.name)}</div>
-            <div class="med-tags">${timeTag}${foodTag}</div>
-          </div>
+          <button type="button" class="med-checkbox checked" aria-label="Mark not taken" onclick="toggleCheck('${today}','${key}')"></button>
+          <div class="med-info"><div class="med-name">${escapeHTML(med.name)}</div><div class="med-tags">${timeTag}${foodTag}</div></div>
         </div>`;
       }
     }
@@ -1463,29 +2735,27 @@
   // ── Week View ──────────────────────────────────────────
   let selectedWeekDay = null;
 
-  function renderWeek() {
-    const today    = new Date();
-    const monday   = getMondayOf(today);
+function renderWeek() {
+    const today = new Date();
+    const monday = getMondayOf(today);
     const todayStr = dateKey(today);
-    let stripHtml  = '';
-
-    for (let i = 0; i < 7; i++) {
-      const d    = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      const dStr    = dateKey(d);
-      const isToday = dStr === todayStr;
-      const isActive = selectedWeekDay ? selectedWeekDay === dStr : isToday;
-      stripHtml += `<div class="day-btn ${isActive ? 'active' : ''} ${isToday ? 'today-dot' : ''}"
-        onclick="selectWeekDay('${dStr}')">
-        <div class="day-name">${DAYS_S[d.getDay()]}</div>
-        <div class="day-num">${d.getDate()}</div>
-      </div>`;
+    let stripHtml = '';
+    for (let index = 0; index < 7; index += 1) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + index);
+      const dayStr = dateKey(date);
+      const isToday = dayStr === todayStr;
+      const isActive = selectedWeekDay ? selectedWeekDay === dayStr : isToday;
+      const density = getDayDoseDensity(dayStr);
+      stripHtml += `<button class="day-btn ${isActive ? 'active' : ''} ${isToday ? 'today-dot' : ''}" type="button" aria-label="${DAYS[date.getDay()]} ${date.getDate()}" onclick="selectWeekDay('${dayStr}')">
+        <div class="day-name">${DAYS_S[date.getDay()]}</div>
+        <div class="day-num">${date.getDate()}</div>
+        <div class="day-density">${density.map(on => `<span class="${on ? 'on' : ''}"></span>`).join('')}</div>
+      </button>`;
     }
     document.getElementById('dayStrip').innerHTML = stripHtml;
-
     const selectedDay = selectedWeekDay || todayStr;
-    const { html } = buildSlotsHTML(selectedDay, false);
-    document.getElementById('weekSlots').innerHTML = html;
+    document.getElementById('weekSlots').innerHTML = buildSlotsHTML(selectedDay, false).html;
   }
 
   function selectWeekDay(dStr) {
@@ -1494,82 +2764,44 @@
   }
 
   // ── Meds View ──────────────────────────────────────────
-  function renderMeds() {
+function renderMeds() {
     const list = document.getElementById('medicineList');
     const slotTimes = readSlotTimes();
-    document.getElementById('medsCount').textContent =
-      state.medicines.length + ' Total';
-
-    if (state.medicines.length === 0) {
-      list.innerHTML = `<div class="no-medicines">
-        <div class="big-icon">🌿</div>
-        <p>No medicines yet.<br>Tap <strong>Add</strong> to get started.</p>
-      </div>`;
+    document.getElementById('medsCount').textContent = state.medicines.length + (state.medicines.length === 1 ? ' medicine' : ' medicines');
+    if (!state.medicines.length) {
+      list.innerHTML = '<div class="no-medicines"><div class="big-icon"></div><p>No medicines yet.<br>Tap <strong>+</strong> to get started.</p></div>';
       return;
     }
-
     list.innerHTML = state.medicines.map(med => {
-      const food     = med.doses[0]?.food || 'before';
+      const food = med.doses[0]?.food || 'before';
       const badgeCls = food === 'before' ? 'badge-before' : 'badge-after';
-      const badgeTxt = food === 'before' ? '🍽️ খাবার আগে' : '🥄 খাবার পরে';
-
+      const badgeTxt = food === 'before' ? 'খাবার আগে' : 'খাবার পরে';
       const timeChips = [...(med.doses || [])]
         .sort((a,b) => getEffectiveDoseTime(a,slotTimes).localeCompare(getEffectiveDoseTime(b,slotTimes)))
-        .map(d => {
-          const slotId = getDoseSlot(d);
-          const slot = SLOTS.find(s => s.id === slotId);
-          const mode = d.useDefaultTime !== false ? ' · Default' : '';
-          return `<span class="time-chip chip-${slotId}">${slot?.icon || '⏰'} ${slot?.name || slotId} · ${formatClockTime(getEffectiveDoseTime(d,slotTimes))}${mode}</span>`;
+        .map(dose => {
+          const slotId = getDoseSlot(dose);
+          const slot = SLOTS.find(item => item.id === slotId);
+          const mode = dose.useDefaultTime !== false ? ' · Default' : '';
+          return `<span class="time-chip chip-${slotId}">${slot?.name || slotId} · ${formatClockTime(getEffectiveDoseTime(dose,slotTimes))}${mode}</span>`;
         }).join('');
-
-      const daysText = formatDays(med.days);
       const status = getCourseStatus(med);
       const statusText = status === 'upcoming' ? 'Upcoming' : status === 'completed' ? 'Completed' : 'Active';
-      const courseEnd = med.durationUnit === 'indefinite'
-        ? 'No end date'
-        : `Ends ${formatDateHuman(med.endDate)}`;
-
-      return `<div class="med-plan-card">
+      const courseEnd = med.durationUnit === 'indefinite' ? 'No end date' : `Ends ${formatDateHuman(med.endDate)}`;
+      return `<article class="med-plan-card">
         <div class="med-plan-top">
-          <div>
-            <div class="med-plan-name-row">
-              <span class="med-dot"></span>
-              <span class="med-plan-name">${escapeHTML(med.name)}</span>
-            </div>
-          </div>
-          <div class="med-plan-badges">
-            <span class="course-status status-${status}">${statusText}</span>
-            <span class="food-badge ${badgeCls}">${badgeTxt}</span>
-          </div>
+          <div class="med-plan-name-row"><span class="med-dot"></span><span class="med-plan-name">${escapeHTML(med.name)}</span></div>
+          <div class="med-plan-badges"><span class="course-status status-${status}">${statusText}</span><span class="food-badge ${badgeCls}">${badgeTxt}</span></div>
         </div>
         <div class="med-plan-meta">
-          <div class="meta-row">
-            <div class="meta-item">
-              <span class="meta-label">Time</span>
-              <div class="time-chips">${timeChips}</div>
-            </div>
-          </div>
-          <div class="meta-row">
-            <div class="meta-item">
-              <span class="meta-label">Frequency</span>
-              <span class="meta-value">${daysText}</span>
-            </div>
-          </div>
-          <div class="meta-row">
-            <div class="meta-item">
-              <span class="meta-label">Course</span>
-              <div class="course-summary">
-                <span class="meta-value">Starts ${formatDateHuman(med.startDate)}</span>
-                <span class="meta-value">${formatDuration(med)} · ${courseEnd}</span>
-              </div>
-            </div>
-          </div>
+          <div class="meta-row"><div class="meta-item"><span class="meta-label">Time</span><div class="time-chips">${timeChips}</div></div></div>
+          <div class="meta-row"><div class="meta-item"><span class="meta-label">Frequency</span><span class="meta-value">${formatDays(med.days)}</span></div></div>
+          <div class="meta-row"><div class="meta-item"><span class="meta-label">Course</span><div class="course-summary"><span class="meta-value">Starts ${formatDateHuman(med.startDate)}</span><span class="meta-value">${formatDuration(med)} · ${courseEnd}</span></div></div></div>
         </div>
         <div class="med-plan-actions">
-          <button class="btn-edit" onclick="editMedicine('${med.id}')">✏️ Edit</button>
-          <button class="btn-delete" onclick="removeMedicine('${med.id}')">🗑</button>
+          <button class="btn-edit" type="button" onclick="editMedicine('${med.id}')">Edit medicine</button>
+          <button class="btn-delete" type="button" aria-label="Delete medicine" onclick="removeMedicine('${med.id}')"></button>
         </div>
-      </div>`;
+      </article>`;
     }).join('');
   }
 
@@ -1601,53 +2833,33 @@
     });
   }
 
-  function renderDoseTimeEditors() {
+function renderDoseTimeEditors() {
     const container = document.getElementById('doseTimeEditors');
     const slotTimes = readSlotTimes();
     let html = '';
-
     SLOTS.forEach(slot => {
       const doses = doseDrafts.filter(dose => dose.slot === slot.id);
       if (!doses.length) return;
-
       html += `<div class="slot-time-editor">
-        <div class="slot-time-editor-header">
-          <div>
-            <div class="slot-time-editor-title">${slot.icon} ${slot.label} · ${slot.name}</div>
-            <div class="slot-time-editor-sub">${doses.length} ${doses.length === 1 ? 'time' : 'times'} selected</div>
-          </div>
-        </div>`;
-
+        <div class="slot-time-editor-header"><div>
+          <div class="slot-time-editor-title"><span class="editor-slot-icon">${slotSvg(slot.id)}</span>${slot.label} · ${slot.name}</div>
+          <div class="slot-time-editor-sub">${doses.length} ${doses.length === 1 ? 'time' : 'times'} selected</div>
+        </div></div>`;
       doses.forEach(dose => {
         if (dose.useDefaultTime !== false) {
           html += `<div class="dose-time-row">
-            <div class="dose-time-copy">
-              <div class="dose-time-mode">Uses Settings default</div>
-              <div class="dose-time-value">${formatClockTime(slotTimes[slot.id])}</div>
-            </div>
-            <div class="dose-time-actions">
-              <button type="button" class="btn-time-small" onclick="makeDoseCustom('${dose.id}')">Change</button>
-              <button type="button" class="btn-time-small btn-time-remove" aria-label="Remove time" onclick="removeDoseTime('${dose.id}')">×</button>
-            </div>
+            <div class="dose-time-copy"><div class="dose-time-mode">Uses Settings default</div><div class="dose-time-value">${formatClockTime(slotTimes[slot.id])}</div></div>
+            <div class="dose-time-actions"><button type="button" class="btn-time-small" onclick="makeDoseCustom('${dose.id}')">Change</button><button type="button" class="btn-time-small btn-time-remove" aria-label="Remove time" onclick="removeDoseTime('${dose.id}')">×</button></div>
           </div>`;
         } else {
           html += `<div class="dose-time-row">
-            <div class="dose-time-copy">
-              <div class="dose-time-mode">Custom time</div>
-              <input class="dose-time-input" type="time" value="${escapeHTML(dose.customTime || slotTimes[slot.id])}"
-                aria-label="Custom ${slot.name} time" onchange="updateDoseCustomTime('${dose.id}', this.value)" />
-            </div>
-            <div class="dose-time-actions">
-              <button type="button" class="btn-time-small" onclick="useDefaultDoseTime('${dose.id}')">Use default</button>
-              <button type="button" class="btn-time-small btn-time-remove" aria-label="Remove time" onclick="removeDoseTime('${dose.id}')">×</button>
-            </div>
+            <div class="dose-time-copy"><div class="dose-time-mode">Custom time</div><input class="dose-time-input" type="time" value="${escapeHTML(dose.customTime || slotTimes[slot.id])}" aria-label="Custom ${slot.name} time" onchange="updateDoseCustomTime('${dose.id}',this.value)" /></div>
+            <div class="dose-time-actions"><button type="button" class="btn-time-small" onclick="useDefaultDoseTime('${dose.id}')">Use default</button><button type="button" class="btn-time-small btn-time-remove" aria-label="Remove time" onclick="removeDoseTime('${dose.id}')">×</button></div>
           </div>`;
         }
       });
-
-      html += `<button type="button" class="btn-add-time" onclick="addDoseTime('${slot.id}')">＋ Add another ${slot.name} time</button></div>`;
+      html += `<button type="button" class="btn-add-time" onclick="addDoseTime('${slot.id}')">Add another ${slot.name.toLowerCase()} time</button></div>`;
     });
-
     container.innerHTML = html;
   }
 
@@ -1997,6 +3209,44 @@ function syncTimesToAndroid(times) {
     console.log('Android times sync: ' + e);
   }
 }
+
+  /* Swipe the weekly schedule one day at a time. */
+  (function() {
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+    const schedule = document.getElementById('weekSlots');
+    schedule.addEventListener('touchstart', event => {
+      const touch = event.changedTouches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      tracking = true;
+    }, {passive:true});
+    schedule.addEventListener('touchend', event => {
+      if (!tracking) return;
+      tracking = false;
+      const touch = event.changedTouches[0];
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+      if (Math.abs(deltaX) > 56 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25) changeWeekDay(deltaX < 0 ? 1 : -1);
+    }, {passive:true});
+  })();
+
+  let chromeScrollRAF = 0;
+  window.addEventListener('scroll', () => {
+    if (chromeScrollRAF) return;
+    chromeScrollRAF = requestAnimationFrame(() => {
+      document.body.classList.toggle('chrome-scrolled', window.scrollY > 18);
+      chromeScrollRAF = 0;
+    });
+  }, {passive:true});
+
+  window.addEventListener('resize', moveNavLens);
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && document.getElementById('addSheet').classList.contains('open')) closeAddSheet();
+  });
+
+
   // ── Service Worker ─────────────────────────────────────
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -2005,9 +3255,13 @@ function syncTimesToAndroid(times) {
   }
 
   // ── Init ──────────────────────────────────────────────
+  initTheme();
+  hydrateStaticIcons();
   loadState();
   initTimePickers();
   renderAll();
+  loadSlotTimes();
+  updateNotificationAccessUI();
 
   // ★ Initial sync of medicine data to native Android alarm system
   syncToAndroid();
@@ -2016,10 +3270,12 @@ try {
   const savedTimes = localStorage.getItem('meditrack_slot_times');
   if (savedTimes) syncTimesToAndroid(JSON.parse(savedTimes));
 } catch(e) {}
+  requestAnimationFrame(moveNavLens);
 
   // Re-check week reset every minute
   setInterval(() => {
     checkWeekReset();
+    updateAmbient();
     if (activeTab === 'today') renderToday();
   }, 60000);
 </script>
